@@ -20,13 +20,13 @@ function Source:is_available()
 		local class_start_pos, class_end_pos = line:find('class%s-=%s-".-"')
 		local className_start_pos, className_end_pos = line:find('className%s-=%s-".-"')
 		if
-			(class_start_pos and class_end_pos and cursor_pos[2] > class_start_pos and cursor_pos[2] <= class_end_pos)
-			or (
-				className_start_pos
-				and className_end_pos
-				and cursor_pos[2] > className_start_pos
-				and cursor_pos[2] <= className_end_pos
-			)
+				(class_start_pos and class_end_pos and cursor_pos[2] > class_start_pos and cursor_pos[2] <= class_end_pos)
+				or (
+					className_start_pos
+					and className_end_pos
+					and cursor_pos[2] > className_start_pos
+					and cursor_pos[2] <= className_end_pos
+				)
 		then
 			return true
 		else
@@ -39,9 +39,7 @@ function Source:complete(_, callback)
 	self.items = {}
 	self.isRemote = "^https?://"
 
-	self.bufnr = vim.api.nvim_get_current_buf()
-
-	if not self.cache[self.bufnr] then
+	if not self.cache.items then
 		if config.get("style_sheets") then
 			for _, uri in ipairs(config.get("style_sheets")) do
 				if string.match(uri, self.isRemote) then
@@ -78,9 +76,9 @@ function Source:complete(_, callback)
 			end
 		end
 		callback({ items = self.items, isIncomplete = false })
-		self.cache[self.bufnr] = self.items
+		self.cache.items = self.items
 	else
-		callback({ items = self.cache[self.bufnr], isIncomplete = false })
+		callback({ items = self.cache.items, isIncomplete = false })
 	end
 end
 
