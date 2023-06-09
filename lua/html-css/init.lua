@@ -3,56 +3,12 @@ local cmp = require("cmp")
 local config = require("html-css.config")
 local utils = require("html-css.utils.init")
 
-function Source:setup(user_config)
-	if not user_config then
-		user_config = config.default_config
-	end
-	-- config = vim.tbl_deep_extend("keep", user_config, config.default_config)
-
+function Source:setup()
 	require("cmp").register_source("bootstrap", Source)
 end
 
 function Source:new()
-	self.items = {}
-	self.isRemote = "^https?://"
-
-	if config.get("style_sheets") then
-		for _, uri in ipairs(config.get("style_sheets")) do
-			if string.match(uri, self.isRemote) then
-				self.response = utils.remote_file().get_remote_file(uri) -- pass the url and return body
-				if not self.response then
-					print("nema responsa")
-					return self
-				end
-				self.classes = utils.remote_file().extract_selectors(self.response) -- extract classes form response
-				self.unique_list = utils.remote_file().remove_duplicates(self.classes) -- remote duplicates from response
-
-				for _, class in ipairs(self.unique_list) do
-					table.insert(self.items, {
-						label = class,
-						kind = cmp.lsp.CompletionItemKind.Enum,
-						documentation = "Bootstrap",
-					})
-				end
-			else
-				self.local_file = utils.local_file().get_local_file(uri)
-				if not self.local_file then
-					print("nema fajla")
-					return self
-				end
-				self.read_local_file = utils.local_file().read_local_file(self.local_file)
-				self.local_classes = utils.remote_file().extract_selectors(self.read_local_file)
-				self.unique_local_list = utils.remote_file().remove_duplicates(self.local_classes)
-				for _, class in ipairs(self.unique_local_list) do
-					table.insert(self.items, {
-						label = class,
-						kind = cmp.lsp.CompletionItemKind.Enum,
-						documentation = "Local Style",
-					})
-				end
-			end
-		end
-	end
+	self.cache = {}
 
 	return self
 end
@@ -64,13 +20,13 @@ function Source:is_available()
 		local class_start_pos, class_end_pos = line:find('class%s-=%s-".-"')
 		local className_start_pos, className_end_pos = line:find('className%s-=%s-".-"')
 		if
-				(class_start_pos and class_end_pos and cursor_pos[2] > class_start_pos and cursor_pos[2] <= class_end_pos)
-				or (
-					className_start_pos
-					and className_end_pos
-					and cursor_pos[2] > className_start_pos
-					and cursor_pos[2] <= className_end_pos
-				)
+			(class_start_pos and class_end_pos and cursor_pos[2] > class_start_pos and cursor_pos[2] <= class_end_pos)
+			or (
+				className_start_pos
+				and className_end_pos
+				and cursor_pos[2] > className_start_pos
+				and cursor_pos[2] <= className_end_pos
+			)
 		then
 			return true
 		else
@@ -80,7 +36,52 @@ function Source:is_available()
 end
 
 function Source:complete(_, callback)
-	callback(self.items)
+	self.items = {}
+	self.isRemote = "^https?://"
+
+	self.bufnr = vim.api.nvim_get_current_buf()
+
+	if not self.cache[self.bufnr] then
+		if config.get("style_sheets") then
+			for _, uri in ipairs(config.get("style_sheets")) do
+				if string.match(uri, self.isRemote) then
+					self.response = utils.remote_file().get_remote_file(uri) -- pass the url and return body
+					if not self.response then
+						print("nema responsa")
+					end
+					self.classes = utils.remote_file().extract_selectors(self.response) -- extract classes form response
+					self.unique_list = utils.remote_file().remove_duplicates(self.classes) -- remote duplicates from response
+
+					for _, class in ipairs(self.unique_list) do
+						table.insert(self.items, {
+							label = class,
+							kind = cmp.lsp.CompletionItemKind.Enum,
+							documentation = "Bootstrap",
+						})
+					end
+				else
+					self.local_file = utils.local_file().get_local_file(uri)
+					if not self.local_file then
+						print("nema fajla")
+					end
+					self.read_local_file = utils.local_file().read_local_file(self.local_file)
+					self.local_classes = utils.remote_file().extract_selectors(self.read_local_file)
+					self.unique_local_list = utils.remote_file().remove_duplicates(self.local_classes)
+					for _, class in ipairs(self.unique_local_list) do
+						table.insert(self.items, {
+							label = class,
+							kind = cmp.lsp.CompletionItemKind.Enum,
+							documentation = "Local Style",
+						})
+					end
+				end
+			end
+		end
+		callback({ items = self.items, isIncomplete = false })
+		self.cache[self.bufnr] = self.items
+	else
+		callback({ items = self.cache[self.bufnr], isIncomplete = false })
+	end
 end
 
 return Source:new()
