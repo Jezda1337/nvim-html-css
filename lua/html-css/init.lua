@@ -3,8 +3,6 @@ local cmp = require("cmp")
 local config = require("html-css.config")
 local utils = require("html-css.utils.init")
 
--- vim.cmd("autocmd BufWritePost * lua require('html-css'):new()")
-
 function Source:setup()
 	require("cmp").register_source("bootstrap", Source)
 end
@@ -53,14 +51,14 @@ function Source:complete(_, callback)
 						return
 					end
 
-					self.classes = utils.remote_file.extract_selectors(self.response)
-					self.unique_list = utils.remote_file.remove_duplicates(self.classes)
+					self.classes = utils.extract_selectors(self.response)
+					self.unique_list = utils.remove_duplicates(self.classes)
 
 					for _, class in ipairs(self.unique_list) do
 						table.insert(self.items, {
 							label = class,
 							kind = cmp.lsp.CompletionItemKind.Enum,
-							menu = utils.remote_file.get_file_name(uri),
+							menu = utils.get_file_name(uri, "[^/]+%.%w+$"),
 						})
 					end
 				else
@@ -71,14 +69,15 @@ function Source:complete(_, callback)
 						})
 						return
 					end
+
 					self.read_local_file = utils.local_file.read_local_file(self.local_file)
-					self.local_classes = utils.remote_file.extract_selectors(self.read_local_file)
-					self.unique_local_list = utils.remote_file.remove_duplicates(self.local_classes)
+					self.local_classes = utils.extract_selectors(self.read_local_file)
+					self.unique_local_list = utils.remove_duplicates(self.local_classes)
 					for _, class in ipairs(self.unique_local_list) do
 						table.insert(self.items, {
 							label = class,
 							kind = cmp.lsp.CompletionItemKind.Enum,
-							menu = utils.local_file.get_file_name(uri),
+							menu = utils.get_file_name(uri, "[^/]+$"),
 						})
 					end
 				end

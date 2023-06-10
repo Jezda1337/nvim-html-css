@@ -23,9 +23,4 @@ function M.read_local_file(path)
 	return f
 end
 
-function M.get_file_name(path)
-	local fileName = path:match("[^/]+$")
-	return fileName
-end
-
 return M
