@@ -9,7 +9,7 @@ function M.get_remote_file(url)
 		return nil, {}
 	end
 
-	return response.body
+	return response.status, response.body
 end
 
 function M.extract_selectors(styles)
@@ -37,6 +37,11 @@ function M.remove_duplicates(t)
 	end
 
 	return result
+end
+
+function M.get_file_name(url)
+	local fileName = url:match("[^/]+%.%w+$")
+	return fileName
 end
 
 return M

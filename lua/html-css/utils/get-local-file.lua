@@ -10,13 +10,10 @@ function M.get_local_file(path)
 		return nil
 	end
 
-	print(p:absolute())
-
 	return p:absolute()
 end
 
 function M.read_local_file(path)
-	print(path)
 	local file = io.open(path, "rb")
 	if not file then
 		return nil
@@ -24,6 +21,11 @@ function M.read_local_file(path)
 	local f = file:read("*a")
 	file:close()
 	return f
+end
+
+function M.get_file_name(path)
+	local fileName = path:match("[^/]+$")
+	return fileName
 end
 
 return M

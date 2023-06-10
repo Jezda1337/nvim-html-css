@@ -2,9 +2,7 @@ local M = {}
 
 local default_config = {
 	file_types = {
-		"html",
 		"css",
-		"scss",
 	},
 	max_count = 10,
 	-- style_sheets = {

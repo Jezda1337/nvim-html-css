@@ -1,11 +1,7 @@
 local M = {}
 
-function M.remote_file()
-	return require("html-css.utils.get-remote-file")
-end
+M.remote_file = require("html-css.utils.get-remote-file")
 
-function M.local_file()
-	return require("html-css.utils.get-local-file")
-end
+M.local_file = require("html-css.utils.get-local-file")
 
 return M
