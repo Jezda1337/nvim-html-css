@@ -1,15 +1,13 @@
 local M = {}
 local Curl = require("plenary.curl")
+local async = require("plenary.async")
 
-function M.get_remote_file(url)
-	local response = Curl.get(url)
-
-	if not response then
-		print("There is no response.")
-		return nil, {}
-	end
-
-	return response.status, response.body
-end
+M.get_remote_file = async.wrap(function(url, callback)
+	Curl.get(url, {
+		callback = function(out)
+			callback(out.status, out.body)
+		end,
+	})
+end, 2)
 
 return M
