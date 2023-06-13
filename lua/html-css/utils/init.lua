@@ -37,4 +37,25 @@ M.remote_file = require("html-css.utils.get-remote-file")
 
 M.local_file = require("html-css.utils.get-local-file")
 
+function M.remove_duplicate_tables_by_label(tbl)
+	local uniqueTables = {}
+	local result = {}
+
+	for _, item in ipairs(tbl) do
+		local isDuplicate = false
+		for _, uniqueTable in ipairs(uniqueTables) do
+			if item.label == uniqueTable.label then
+				isDuplicate = true
+				break
+			end
+		end
+		if not isDuplicate then
+			table.insert(uniqueTables, item)
+			table.insert(result, item)
+		end
+	end
+
+	return result
+end
+
 return M
