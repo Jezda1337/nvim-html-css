@@ -1,12 +1,13 @@
 local Source = {}
 local cmp = require("cmp")
 local config = require("html-css.config")
+local cmp_config = require("cmp.config")
 local utils = require("html-css.utils.init")
 local async = require("plenary.async")
 
 function Source:before_init()
-	if config.get("style_sheets") then
-		for _, uri in ipairs(config.get("style_sheets")) do
+	if self.user_config.option.style_sheets then
+		for _, uri in ipairs(self.user_config.option.style_sheets) do
 			if string.match(uri, self.isRemote) then
 				if not self.cache.items then -- run once
 					async.run(function()
@@ -64,10 +65,11 @@ function Source:before_init()
 end
 
 function Source:setup()
-	require("cmp").register_source("html-css", Source)
+	require("cmp").register_source(self.source_name, Source)
 end
 
 function Source:new()
+	self.source_name = "html-css"
 	self.cache = {}
 	self.items = {}
 	self.isRemote = "^https?://"
@@ -75,23 +77,36 @@ function Source:new()
 	self.local_sources = {}
 	self.fileStates = {}
 	self.has_new_items = false
+	self.user_config = {}
 
-	-- Initialize the file states for each file
-	for _, file in ipairs(config.get("style_sheets")) do
-		if not string.match(file, self.isRemote) then
-			self.fileStates[file] = nil
+	-- reading user config
+	self.user_config = cmp_config.get_source_config(self.source_name) or {}
+	self.user_config.option = self.user_config.option or {}
+
+	if not next(self.user_config.option) then
+		error("There is no config?", 2)
+	else
+		for _, file in ipairs(self.user_config.option.style_sheets) do
+			if not string.match(file, self.isRemote) then
+				self.fileStates[file] = nil
+			end
 		end
+		-- get external data and read local files before
+		-- user start typing
+		self.before_init(self)
 	end
-	-- get external data and read local files before
-	-- user start typing
-	self.before_init(self)
 
 	-- require("html-css.utils.read-embeded-file")
 	return self
 end
 
 function Source:is_available()
-	if not vim.tbl_contains(config.get("file_types"), vim.bo.filetype) then
+	-- if there is no user config then plugin is disabled
+	if not next(self.user_config.option) then
+		return false
+	end
+
+	if not vim.tbl_contains(self.user_config.option.file_types or config.get("file_types"), vim.bo.filetype) then
 		return false
 	end
 
@@ -103,13 +118,13 @@ function Source:is_available()
 		local className_start_pos, className_end_pos = line:find('className%s-=%s-".-"')
 
 		if
-			(class_start_pos and class_end_pos and cursor_pos[2] > class_start_pos and cursor_pos[2] <= class_end_pos)
-			or (
-				className_start_pos
-				and className_end_pos
-				and cursor_pos[2] > className_start_pos
-				and cursor_pos[2] <= className_end_pos
-			)
+				(class_start_pos and class_end_pos and cursor_pos[2] > class_start_pos and cursor_pos[2] <= class_end_pos)
+				or (
+					className_start_pos
+					and className_end_pos
+					and cursor_pos[2] > className_start_pos
+					and cursor_pos[2] <= className_end_pos
+				)
 		then
 			return true
 		else
@@ -119,16 +134,19 @@ function Source:is_available()
 end
 
 function Source:complete(_, callback)
-	if config.get("style_sheets") then
-		for _, file in ipairs(config.get("style_sheets")) do
+	if self.user_config.option.style_sheets then
+		for _, file in ipairs(self.user_config.option.style_sheets) do
 			if not string.match(file, self.isRemote) then
 				local local_file = utils.local_file.get_local_file(file)
+				-- if not local_file then
+				-- 	return nil
+				-- end
 				local currentStat = vim.loop.fs_stat(local_file)
 
 				if
-					self.fileStates[local_file]
-					and currentStat
-					and self.fileStates[local_file].mtime.sec == currentStat.mtime.sec
+						self.fileStates[local_file]
+						and currentStat
+						and self.fileStates[local_file].mtime.sec == currentStat.mtime.sec
 				then
 					local result = utils.remove_duplicate_tables_by_label(self.cache.items)
 					callback({ items = result, isIncomplete = false })

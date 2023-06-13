@@ -6,7 +6,7 @@ local default_config = {
 		"css",
 		"scss",
 	},
-	max_count = 10,
+	max_count = 10, -- TODO
 }
 
 function M:setup(user_config)
