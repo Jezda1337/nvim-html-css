@@ -106,9 +106,9 @@ function Source:is_available()
 		return false
 	end
 
-	if not vim.tbl_contains(self.user_config.option.file_types or config.get("file_types"), vim.bo.filetype) then
-		return false
-	end
+	-- if not vim.tbl_contains(self.user_config.option.file_types or config.get("file_types"), vim.bo.filetype) then
+	-- 	return false
+	-- end
 
 	local line = vim.api.nvim_get_current_line()
 
@@ -118,13 +118,13 @@ function Source:is_available()
 		local className_start_pos, className_end_pos = line:find('className%s-=%s-".-"')
 
 		if
-				(class_start_pos and class_end_pos and cursor_pos[2] > class_start_pos and cursor_pos[2] <= class_end_pos)
-				or (
-					className_start_pos
-					and className_end_pos
-					and cursor_pos[2] > className_start_pos
-					and cursor_pos[2] <= className_end_pos
-				)
+			(class_start_pos and class_end_pos and cursor_pos[2] > class_start_pos and cursor_pos[2] <= class_end_pos)
+			or (
+				className_start_pos
+				and className_end_pos
+				and cursor_pos[2] > className_start_pos
+				and cursor_pos[2] <= className_end_pos
+			)
 		then
 			return true
 		else
@@ -138,15 +138,11 @@ function Source:complete(_, callback)
 		for _, file in ipairs(self.user_config.option.style_sheets) do
 			if not string.match(file, self.isRemote) then
 				local local_file = utils.local_file.get_local_file(file)
-				-- if not local_file then
-				-- 	return nil
-				-- end
 				local currentStat = vim.loop.fs_stat(local_file)
-
 				if
-						self.fileStates[local_file]
-						and currentStat
-						and self.fileStates[local_file].mtime.sec == currentStat.mtime.sec
+					self.fileStates[local_file]
+					and currentStat
+					and self.fileStates[local_file].mtime.sec == currentStat.mtime.sec
 				then
 					local result = utils.remove_duplicate_tables_by_label(self.cache.items)
 					callback({ items = result, isIncomplete = false })
@@ -174,6 +170,10 @@ function Source:complete(_, callback)
 					self.fileStates[local_file] = currentStat
 					self.cache.items = vim.deepcopy(self.items)
 				end
+			else
+				-- in case there is no local files, then use cached items
+				local result = utils.remove_duplicate_tables_by_label(self.cache.items)
+				callback({ items = result, isIncomplete = false })
 			end
 		end
 	end
