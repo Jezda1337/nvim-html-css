@@ -1,7 +1,7 @@
 local M = {}
 
 function M.extract_selectors(tbl)
-	local selectors_pattern = "%.[a-zA-Z_][%w-]*"
+	local selectors_pattern = "%.[a-zA-Z_][%w-]+[%w_]*"
 	local selectors = {}
 
 	for class in tbl:gmatch(selectors_pattern) do
@@ -32,10 +32,6 @@ function M.remove_duplicates(tbl)
 
 	return result
 end
-
-M.remote_file = require("html-css.utils.get-remote-file")
-
-M.local_file = require("html-css.utils.get-local-file")
 
 function M.remove_duplicate_tables_by_label(tbl)
 	local uniqueTables = {}
