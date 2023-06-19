@@ -4,7 +4,12 @@ local utils = require("html-css.utils")
 
 function Source:before_init()
 	local style_sheets_classes =
-		require("html-css.style_sheets").init(self.user_config.option.style_sheets)
+			require("html-css.style_sheets").init(self.user_config.option.style_sheets)
+	if not style_sheets_classes then
+		vim.notify("nvim-html-css can't find style_sheets config.", "error")
+		return
+	end
+	vim.notify("Your remote styles get set, you can use them.")
 	for _, class in ipairs(style_sheets_classes) do
 		table.insert(self.items, class)
 	end
@@ -18,19 +23,17 @@ function Source:new()
 	self.source_name = "html-css"
 	self.cache = {}
 	self.items = {}
-	self.user_config = {}
 
 	-- reading user config
 	self.user_config = cmp_config.get_source_config(self.source_name) or {}
 	self.user_config.option = self.user_config.option or {}
 
-	self:before_init()
+	self:before_init() -- init the plugin on start
 
 	return self
 end
 
 function Source:is_available()
-	-- if there is no user config then plugin is disabled
 	if not next(self.user_config.option) then
 		return false
 	end
@@ -47,18 +50,18 @@ function Source:is_available()
 		local className_start_pos, className_end_pos = line:find('className%s-=%s-".-"')
 
 		if
-			(
-				class_start_pos
-				and class_end_pos
-				and cursor_pos[2] > class_start_pos
-				and cursor_pos[2] <= class_end_pos
-			)
-			or (
-				className_start_pos
-				and className_end_pos
-				and cursor_pos[2] > className_start_pos
-				and cursor_pos[2] <= className_end_pos
-			)
+				(
+					class_start_pos
+					and class_end_pos
+					and cursor_pos[2] > class_start_pos
+					and cursor_pos[2] <= class_end_pos
+				)
+				or (
+					className_start_pos
+					and className_end_pos
+					and cursor_pos[2] > className_start_pos
+					and cursor_pos[2] <= className_end_pos
+				)
 		then
 			return true
 		else

@@ -26,6 +26,9 @@ function M.get_local_path(path)
 end
 
 function M.init(styles)
+	if not styles then
+		return
+	end
 	for _, path in ipairs(styles) do
 		if path:match(isRemote) then
 			a.run(function()
