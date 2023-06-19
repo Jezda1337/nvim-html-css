@@ -47,6 +47,11 @@ function M.init(styles)
 		else
 			a.run(function()
 				local file_path = M.get_local_path(path)
+
+				if file_path == nil then
+					return
+				end
+
 				local _, fd = a.uv.fs_open(file_path, "r", 438)
 				local _, stat = a.uv.fs_fstat(fd)
 				local _, data = a.uv.fs_read(fd, stat.size, 0)
