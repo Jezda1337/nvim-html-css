@@ -1,0 +1,8 @@
+{
+  "diagnostics": {
+    "disable": true,
+    "globals": [
+      "vim"
+    ]
+  }
+}

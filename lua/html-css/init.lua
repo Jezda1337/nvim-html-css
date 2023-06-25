@@ -1,19 +1,12 @@
 local Source = {}
-local cmp_config = require("cmp.config")
-local utils = require("html-css.utils")
 
-function Source:before_init()
-	local style_sheets_classes =
-			require("html-css.style_sheets").init(self.user_config.option.style_sheets)
-	if not style_sheets_classes then
-		vim.notify("nvim-html-css can't find style_sheets config.", "error")
-		return
-	end
-	vim.notify("Your remote styles get set, you can use them.")
-	for _, class in ipairs(style_sheets_classes) do
-		table.insert(self.items, class)
-	end
-end
+local cmp_config = require("cmp.config")
+local w = require("html-css.watch_file")
+local u = require("html-css.utils")
+local a = require("plenary.async")
+local r = require("html-css.remote")
+local l = require("html-css.local")
+local j = require("plenary.job")
 
 function Source:setup()
 	require("cmp").register_source(self.source_name, Source)
@@ -21,14 +14,39 @@ end
 
 function Source:new()
 	self.source_name = "html-css"
-	self.cache = {}
+	self.isRemote = "^https?://"
+	self.has_changed = false
+	self.remote_classes = {}
 	self.items = {}
+	self.cache = {}
 
 	-- reading user config
 	self.user_config = cmp_config.get_source_config(self.source_name) or {}
 	self.user_config.option = self.user_config.option or {}
+	self.css_file_types = self.user_config.option.css_file_types or { "css", "scss", "less" }
 
-	self:before_init() -- init the plugin on start
+	-- init the remote styles
+	for _, uri in ipairs(self.user_config.option.style_sheets) do
+		if uri:match(self.isRemote) then
+			a.run(function()
+				r.init(uri, function(classes)
+					for _, class in ipairs(classes) do
+						table.insert(self.items, class)
+						table.insert(self.remote_classes, class)
+					end
+				end)
+			end)
+		end
+	end
+
+	-- read all local files on start
+	a.run(function()
+		l.read_local_files(self.css_file_types, function(classes)
+			for _, class in ipairs(classes) do
+				table.insert(self.items, class)
+			end
+		end)
+	end)
 
 	return self
 end
@@ -50,18 +68,18 @@ function Source:is_available()
 		local className_start_pos, className_end_pos = line:find('className%s-=%s-".-"')
 
 		if
-				(
-					class_start_pos
-					and class_end_pos
-					and cursor_pos[2] > class_start_pos
-					and cursor_pos[2] <= class_end_pos
-				)
-				or (
-					className_start_pos
-					and className_end_pos
-					and cursor_pos[2] > className_start_pos
-					and cursor_pos[2] <= className_end_pos
-				)
+			(
+				class_start_pos
+				and class_end_pos
+				and cursor_pos[2] > class_start_pos
+				and cursor_pos[2] <= class_end_pos
+			)
+			or (
+				className_start_pos
+				and className_end_pos
+				and cursor_pos[2] > className_start_pos
+				and cursor_pos[2] <= className_end_pos
+			)
 		then
 			return true
 		else
@@ -71,14 +89,56 @@ function Source:is_available()
 end
 
 function Source:complete(_, callback)
-	if self.cache.items ~= nil then
-		local items = utils.remove_duplicate_tables_by_label(self.cache.items)
+	local files = j:new({
+		command = "fd",
+		args = {
+			"-a",
+			"-e",
+			"css",
+			"-e",
+			"scss",
+			"-e",
+			"sass",
+			"-e",
+			"less",
+			"--exclude",
+			"node_modules",
+		},
+		-- args = { "-a", "-e", "" .. ft .. "", "--exclude", "node_modules" },
+	}):sync()
+
+	if #files == 0 then
+		local items = u.remove_duplicate_tables_by_label(self.items)
 		callback({ items = items, isIncomplete = false })
 	else
-		self:before_init()
-		local items = utils.remove_duplicate_tables_by_label(self.items)
-		callback({ items = items, isIncomplete = false })
-		self.cache.items = self.items
+		for _, file in ipairs(files) do
+			self.has_changed = w.has_file_changed(file)
+			if self.has_changed then
+				a.run(function()
+					l.read_local_files(self.css_file_types, function(classes)
+						self.items = {}
+						self.cache = {}
+						for _, class in ipairs(classes) do
+							table.insert(self.items, class)
+						end
+						for _, class in ipairs(self.remote_classes) do
+							table.insert(self.items, class)
+						end
+						callback({ items = self.items, isIncomplete = false })
+						self.cache = self.items
+					end)
+				end)
+			elseif self.cache.items then
+				print("cache")
+				local items = u.remove_duplicate_tables_by_label(self.cache.items)
+				callback({ items = items, isIncomplete = false })
+			else
+				print("no cache")
+				local items = u.remove_duplicate_tables_by_label(self.items)
+				callback({ items = items, isIncomplete = false })
+				self.cache.items = self.items
+			end
+		end
 	end
 end
 
