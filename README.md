@@ -8,6 +8,11 @@ CSS Intellisense for HTML
 
 # Installation
 
+## Required dependencies
+
+- [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
+- [sharkdp/fd](https://github.com/sharkdp/fd) (finder)
+
 ```lua
 return require("lazy").setup({
     {
