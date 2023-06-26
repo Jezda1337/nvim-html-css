@@ -16,7 +16,7 @@ function M.has_file_changed(path)
 
 	if not file then
 		print("File not found.")
-		return nil
+		return false
 	end
 
 	if not file_data[file] then

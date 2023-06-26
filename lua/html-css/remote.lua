@@ -23,6 +23,8 @@ M.init = a.wrap(function(url, cb)
 		if not status == 200 then
 			return {}
 		end
+		classes = {} -- clean prev classes
+
 		local extract_selectors = u.extract_selectors(body)
 		local remote_dup_selectors = u.remove_duplicates(extract_selectors)
 		for _, class in ipairs(remote_dup_selectors) do
