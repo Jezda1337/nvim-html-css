@@ -46,7 +46,7 @@ M.read_html_files = a.wrap(function(cb)
 				start_pos, end_pos = content:find("<style>(.-)</style>", end_pos + 1)
 			end
 
-			cb(styles, has_changed)
+			cb(classes, has_changed)
 		end
 	end
 end, 1)
