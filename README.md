@@ -13,6 +13,7 @@ CSS Intellisense for HTML
 - [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
 - [sharkdp/fd](https://github.com/sharkdp/fd) (finder)
 
+## Lazy
 ```lua
 return require("lazy").setup({
     {
@@ -61,10 +62,6 @@ Setting the formatter this way you will get the file name with an extension in y
 menu, so you know from which file that class coming.
 
 ```lua
-local source_mapping = {
-    ...
-}
-
 require("cmp").setup({
     sources = {
         {
@@ -73,9 +70,10 @@ require("cmp").setup({
     },
     formatting = {
         format = function(entry, vim_item)
-            if entry.source.name == "html-css" do
-                source_mapping["html-css"] = entry.completion_item.menu
+            if entry.source.name == "html-css" then
+                vim_item.menu = entry.source.menu
             end
+            return vim_item
         end
     }
 
