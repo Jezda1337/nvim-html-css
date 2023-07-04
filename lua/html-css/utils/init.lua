@@ -1,118 +1,6 @@
 local M = {}
 
-function trim(s)
-	return (string.gsub(s, "^%s*(.-)%s*$", "%1"))
-end
-
--- --------------------------
--- v1
--- --------------------------
-
--- function parse_css_selectors(css_text)
--- 	local selectors = {}
-
--- 	-- split css rules into individual strings
--- 	local rules = {}
--- 	for rule in css_text:gmatch("[^{}]+") do
--- 		table.insert(rules, rule)
--- 	end
-
--- 	-- iterate over rules and extract selectors
--- 	for _, rule in ipairs(rules) do
--- 		rule = trim(rule) -- remove leading/trailing whitespace
--- 		if rule:sub(1, 1) == "#" or rule:sub(1, 1) == "." then
--- 			-- match ID or class selector
--- 			local selector = rule:match("^[%#%.-]?([%w-_]+)")
--- 			if selector then
--- 				table.insert(selectors, selector)
--- 			end
--- 		elseif rule:sub(1, 1) == "[" then
--- 			-- match attribute selector
--- 			local selector = rule:match("^%[([^%]]+)%]")
--- 			if selector then
--- 				table.insert(selectors, selector)
--- 			end
--- 		elseif rule:sub(1, 1) == "@" then
--- 			-- ignore @-rules
--- 		elseif rule:sub(1, 1) ~= "" then
--- 			-- assume the rule contains a tag selector
--- 			local tag = rule:match("^([%w-_]+)")
--- 			if tag then
--- 				table.insert(selectors, tag)
--- 			end
--- 		end
--- 	end
-
--- 	return selectors
--- end
-
--- --------------------------
--- v2
--- --------------------------
-
--- function parse_css_selectors(css_text)
--- 	local selectors = {}
-
--- 	-- split css rules into individual strings
--- 	local rules = {}
--- 	for rule in css_text:gmatch("[^{}]+") do
--- 		table.insert(rules, rule)
--- 	end
-
--- 	-- iterate over rules and extract selectors
--- 	for _, rule in ipairs(rules) do
--- 		rule = trim(rule) -- remove leading/trailing whitespace
--- 		if rule:sub(1, 1) == "#" or rule:sub(1, 1) == "." then
--- 			-- match ID or class selector
--- 			local selector = rule:match("^[%#%.-]?([%w-_]+)")
--- 			if selector then
--- 				table.insert(selectors, selector)
--- 			end
--- 		elseif rule:sub(1, 1) == "[" then
--- 			-- match attribute selector
--- 			local selector = rule:match("^%[([^%]]+)%]")
--- 			if selector then
--- 				table.insert(selectors, selector)
--- 			end
--- 		elseif rule:sub(1, 1) == "@" then
--- 			-- ignore @-rules
--- 		elseif rule:sub(1, 1) ~= "" then
--- 			-- assume the rule contains a tag selector
--- 			local tag = rule:match("^([%w-_]+)")
--- 			if tag then
--- 				table.insert(selectors, tag)
--- 			end
--- 		end
-
--- 		-- check for special cases of concatenated selectors
--- 		if rule:find("[.#][%w-_]+[.#][%w-_]+") then
--- 			for selector in rule:gmatch("[.#][%w-_]+") do
--- 				selector = selector:sub(2)
--- 				if selector then
--- 					table.insert(selectors, selector)
--- 				end
--- 			end
--- 		end
-
--- 		if rule:find("[^%w][%w-_]+[.#][%w-_]+") then
--- 			for selector in rule:gmatch("[^%w][%w-_]+") do
--- 				selector = selector:sub(2)
--- 				if selector then
--- 					table.insert(selectors, selector)
--- 				end
--- 			end
--- 			for selector in rule:gmatch("[.#][%w-_]+") do
--- 				selector = selector:sub(2)
--- 				if selector then
--- 					table.insert(selectors, selector)
--- 				end
--- 			end
--- 		end
--- 	end
-
--- 	return selectors
--- end
-
+---@type item{}
 local selectors = {}
 
 function M.extract_selectors(tbl)
@@ -141,7 +29,7 @@ function M.get_file_name(file, pattern)
 	return fileName
 end
 
-function M.remove_duplicates(tbl)
+function M.unique_list(tbl)
 	local seen = {}
 	local result = {}
 

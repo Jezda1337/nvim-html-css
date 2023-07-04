@@ -1,20 +1,18 @@
 -- embedded styles are all styles between <style></style> tags
 -- inside .html files
-
 local M = {}
 local j = require("plenary.job")
 local u = require("html-css.utils.init")
 local a = require("plenary.async")
 local cmp = require("cmp")
-local w = require("html-css.watch")
+local classes = {}
 
 M.read_html_files = a.wrap(function(cb)
-	local classes = {}
 	local has_changed = false
 
 	local files = j:new({
 		command = "fd",
-		args = { "-a", "-e", "html" },
+		args = { "-a", "-e", "html", "--exclude", "node_modules" },
 	}):sync()
 
 	if #files == 0 then
@@ -27,8 +25,6 @@ M.read_html_files = a.wrap(function(cb)
 			end
 
 			classes = {} -- clean table from prev styles
-
-			has_changed = w.has_file_changed(file)
 
 			local content = table.concat(lines, "\n")
 			local start_pos, end_pos = content:find("<style>(.-)</style>")

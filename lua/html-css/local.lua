@@ -3,16 +3,10 @@ local cmp = require("cmp")
 local u = require("html-css.utils.init")
 local a = require("plenary.async")
 local j = require("plenary.job")
-local w = require("html-css.watch")
+local classes = {}
 
+---@async
 M.read_local_files = a.wrap(function(_, cb)
-	local styles = {}
-	local has_changed = false
-
-	-- for _, ft in ipairs(file_types) do
-	-- 	print(ft)
-	-- end
-
 	local files = j:new({
 		command = "fd",
 		args = {
@@ -35,21 +29,27 @@ M.read_local_files = a.wrap(function(_, cb)
 		return nil
 	else
 		for _, file in ipairs(files) do
-			has_changed = w.has_file_changed(file)
+			local file_name = u.get_file_name(file, "[^/]+$")
+
+			classes = {} -- clean up prev classes
+
 			local _, fd = a.uv.fs_open(file, "r", 438)
 			local _, stat = a.uv.fs_fstat(fd)
 			local _, data = a.uv.fs_read(fd, stat.size, 0)
 			a.uv.fs_close(fd)
+
 			local extract_selectors = u.extract_selectors(data)
-			local remove_dup_selectors = u.remove_duplicates(extract_selectors)
+			local remove_dup_selectors = u.unique_list(extract_selectors)
+
 			for _, class in ipairs(remove_dup_selectors) do
-				table.insert(styles, {
+				table.insert(classes, {
 					label = class,
 					kind = cmp.lsp.CompletionItemKind.Enum,
-					menu = u.get_file_name(file, "[^/]+$"),
+					menu = file_name,
 				})
 			end
-			cb(styles, has_changed)
+			print(vim.inspect(classes))
+			cb(classes)
 		end
 	end
 end, 2)
