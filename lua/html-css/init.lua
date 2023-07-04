@@ -60,10 +60,10 @@ function Source:new()
 end
 
 function Source:complete(_, callback)
-	vim.cmd([[augroup cssAutocmds
-  autocmd!
-  autocmd BufWritePost *.css :silent !cmp run
-augroup END]])
+	vim.api.nvim_create_autocmd("BufWritePost", {
+		pattern = { "*.css", "*.scss", "*.sass", "*.less" },
+		command = ":silent !cmp run",
+	})
 
 	self.items = {}
 
