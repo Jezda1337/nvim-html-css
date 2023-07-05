@@ -49,11 +49,11 @@ return require("lazy").setup({
 ```lua
 option = {
     max_count = {}, -- not ready yet
-    file_types = {
+    enable_on = {
         "html"
         ...
-    },
-    -- css_file_types = {}, -- not ready yet
+    }, -- set the file types you want the plugin to work on
+    file_extensions = { "css", "sass", "less" }, -- set the local filetypes from which you want to derive classes
     style_sheets = {
         -- example of remote styles
         "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css",
@@ -64,8 +64,8 @@ option = {
 
 ## 🤩 Pretty Menu Items
 
-Setting the formatter this way you will get the file name with an extension in your cmp
-menu, so you know from which file that class coming.
+Setting the formatter this way you will get the file name with an extension in
+your cmp menu, so you know from which file that class coming.
 
 ```lua
 require("cmp").setup({
