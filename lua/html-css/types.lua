@@ -1,0 +1,1 @@
+---@alias item { label:string, kind: string, menu: string }

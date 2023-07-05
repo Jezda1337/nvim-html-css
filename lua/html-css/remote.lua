@@ -3,12 +3,14 @@ local a = require("plenary.async")
 local c = require("plenary.curl")
 local u = require("html-css.utils.init")
 local cmp = require("cmp")
+
 local ts = vim.treesitter
 
----@alias item {label:string, kind: string, menu: string}
-
----@type item[]
+---@type table<item>[]
 local classes = {}
+
+---@type string[]
+local unique_class = {}
 
 ---@type string
 local qs = [[
@@ -37,6 +39,9 @@ M.init = a.wrap(function(url, cb)
 	end
 
 	get_remote_styles(url, function(status, body)
+		---@ type string
+		local file_name = u.get_file_name(url, "[^/]+$")
+
 		if not status == 200 then
 			return {}
 		end
@@ -46,19 +51,20 @@ M.init = a.wrap(function(url, cb)
 		local tree = parser:parse()[1]
 		local root = tree:root()
 		local query = ts.query.parse("css", qs)
-		local unique_class = {}
-		for _, matches, _ in query:iter_matches(root, body) do
+
+		for _, matches, _ in query:iter_matches(root, body, 0, 0, {}) do
 			local class = matches[1]
 			local class_name = ts.get_node_text(class, body)
 			table.insert(unique_class, class_name)
 		end
 
-		local test = u.unique_list(unique_class)
-		for _, class in ipairs(test) do
+		local unique_list = u.unique_list(unique_class)
+
+		for _, class in ipairs(unique_list) do
 			table.insert(classes, {
 				label = class,
 				kind = cmp.lsp.CompletionItemKind.Enum,
-				menu = u.get_file_name(url, "[^/]+$"),
+				menu = file_name,
 			})
 		end
 

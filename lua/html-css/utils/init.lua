@@ -3,6 +3,8 @@ local M = {}
 ---@type item{}
 local selectors = {}
 
+-- TODO needs to change in favore to tree-sitter
+---@return table<string>
 function M.extract_selectors(tbl)
 	-- local selectors_pattern = "%.[a-zA-Z_][%w-]+[%w_]*"
 	-- local selectors_pattern = "(?<!/%*)%.[a-zA-Z_][%w-]*"
@@ -22,6 +24,7 @@ function M.extract_selectors(tbl)
 	return selectors
 end
 
+---@return string
 function M.get_file_name(file, pattern)
 	-- "[^/]+%.%w+$"  -- from url
 	-- "[^/]+$" -- from local file
@@ -29,6 +32,7 @@ function M.get_file_name(file, pattern)
 	return fileName
 end
 
+---@return table<string[]>
 function M.unique_list(tbl)
 	local seen = {}
 	local result = {}
@@ -43,6 +47,7 @@ function M.unique_list(tbl)
 	return result
 end
 
+---@return table<item[]>
 function M.remove_duplicate_tables_by_label(tbl)
 	local uniqueTables = {}
 	local result = {}

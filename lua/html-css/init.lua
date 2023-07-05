@@ -1,5 +1,5 @@
 local Source = {}
-local cmp_config = require("cmp.config")
+local config = require("cmp.config")
 local a = require("plenary.async")
 local r = require("html-css.remote")
 local l = require("html-css.local")
@@ -12,19 +12,18 @@ end
 function Source:new()
 	self.source_name = "html-css"
 	self.isRemote = "^https?://"
-	self.has_changed = false
 	self.remote_classes = {}
-	self.local_classes = {}
-	self.embedded_classes = {}
 	self.items = {}
 
 	-- reading user config
-	self.user_config = cmp_config.get_source_config(self.source_name) or {}
-	self.user_config.option = self.user_config.option or {}
-	self.css_file_types = self.user_config.option.css_file_types or { "css", "scss", "less" }
+	self.user_config = config.get_source_config(self.source_name) or {}
+	self.option = self.user_config.option or {}
+	self.file_extensions = self.option.file_extensions or { "css", "scss", "less", "sass" }
+	self.style_sheets = self.option.style_sheets or {}
+	self.enable_on = self.option.enable_on or {}
 
 	-- init the remote styles
-	for _, url in ipairs(self.user_config.option.style_sheets) do
+	for _, url in ipairs(self.style_sheets) do
 		if url:match(self.isRemote) then
 			a.run(function()
 				r.init(url, function(classes)
@@ -40,7 +39,6 @@ function Source:new()
 	-- handle embedded styles
 	a.run(function()
 		e.read_html_files(function(classes)
-			self.embedded_classes = classes
 			for _, class in ipairs(classes) do
 				table.insert(self.items, class)
 			end
@@ -49,7 +47,7 @@ function Source:new()
 
 	-- read all local files on start
 	a.run(function()
-		l.read_local_files(self.css_file_types, function(classes, _)
+		l.read_local_files(self.file_extensions, function(classes)
 			for _, class in ipairs(classes) do
 				table.insert(self.items, class)
 			end
@@ -61,7 +59,8 @@ end
 
 function Source:complete(_, callback)
 	vim.api.nvim_create_autocmd("BufWritePost", {
-		pattern = { "*.css", "*.scss", "*.sass", "*.less" },
+		-- pattern = { "*.css", "*.scss", "*.sass", "*.less" },
+		pattern = self.file_extensions,
 		command = ":silent !cmp run",
 	})
 
@@ -78,7 +77,7 @@ function Source:complete(_, callback)
 
 	-- read all local files on start
 	a.run(function()
-		l.read_local_files(self.css_file_types, function(classes)
+		l.read_local_files(self.file_extensions, function(classes)
 			for _, class in ipairs(classes) do
 				table.insert(self.items, class)
 			end
@@ -87,16 +86,15 @@ function Source:complete(_, callback)
 			table.insert(self.items, class)
 		end
 	end)
-
 	callback({ items = self.items, isComplete = false })
 end
 
 function Source:is_available()
-	if not next(self.user_config.option) then
+	if not next(self.option) then
 		return false
 	end
 
-	if not vim.tbl_contains(self.user_config.option.file_types, vim.bo.filetype) then
+	if not vim.tbl_contains(self.option.enable_on, vim.bo.filetype) then
 		return false
 	end
 

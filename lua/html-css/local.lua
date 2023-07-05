@@ -6,24 +6,39 @@ local j = require("plenary.job")
 local classes = {}
 
 ---@async
-M.read_local_files = a.wrap(function(_, cb)
-	local files = j:new({
-		command = "fd",
-		args = {
-			"-a",
-			"-e",
-			"css",
-			"-e",
-			"scss",
-			"-e",
-			"sass",
-			"-e",
-			"less",
-			"--exclude",
-			"node_modules",
-		},
-		-- args = { "-a", "-e", "" .. ft .. "", "--exclude", "node_modules" },
-	}):sync()
+M.read_local_files = a.wrap(function(file_extensions, cb)
+	local files = {}
+
+	-- j:new({
+	-- 	command = "fd",
+	-- args = {
+	-- 	"-a",
+	-- 	"-e",
+	-- 	"css",
+	-- 	"-e",
+	-- 	"scss",
+	-- 	"-e",
+	-- 	"sass",
+	-- 	"-e",
+	-- 	"less",
+	-- 	"--exclude",
+	-- 	"node_modules",
+	-- },
+	-- 	on_stdout = function(_, data)
+	-- 		table.insert(files, data)
+	-- 	end,
+	-- }):sync()
+
+	-- WARNING need to check for performance in larger projects
+	for _, extension in ipairs(file_extensions) do
+		j:new({
+			command = "fd",
+			args = { "-a", "-e", "" .. extension .. "", "--exclude", "node_modules" },
+			on_stdout = function(_, data)
+				table.insert(files, data)
+			end,
+		}):sync()
+	end
 
 	if #files == 0 then
 		return nil
@@ -48,7 +63,7 @@ M.read_local_files = a.wrap(function(_, cb)
 					menu = file_name,
 				})
 			end
-			print(vim.inspect(classes))
+
 			cb(classes)
 		end
 	end
