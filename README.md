@@ -6,8 +6,6 @@ CSS Intellisense for HTML
 
 ![image](https://github.com/Jezda1337/nvim-html-css/assets/42359294/782f9ce8-a442-4012-b64b-5257f3527efa)
 
-## About
-
 ## ⚡ Required dependencies
 
 - [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
@@ -61,6 +59,17 @@ option = {
     }
 }
 ```
+
+#### 🔌 Option spec
+
+explanation and types for options.
+
+| Property        | Type  | Description                                                                                                     |
+| :-------------- | :---: | :-------------------------------------------------------------------------------------------------------------- |
+| max_count       |  Int  | Max item in cmp menu                                                                                            |
+| enable_on       | table | Table accepts strings, one string one extension in which the plugin will be available                           |
+| file_extensions | table | Table accepts strings, extensions that you enter, classes that will be available to you will be read from them. |
+| style_sheets    | table | External cdn css styles such as bootstrap or bulma. The link must be valid. Can be minified version or normal.  |
 
 ## 🤩 Pretty Menu Items
 
