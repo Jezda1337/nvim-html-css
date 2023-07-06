@@ -18,7 +18,7 @@ function Source:new()
 	-- reading user config
 	self.user_config = config.get_source_config(self.source_name) or {}
 	self.option = self.user_config.option or {}
-	self.file_extensions = self.option.file_extensions or { "css", "scss", "less", "sass" }
+	self.file_extensions = self.option.file_extensions or { "css", "scss", "less", "sass" } -- remove default options
 	self.style_sheets = self.option.style_sheets or {}
 	self.enable_on = self.option.enable_on or {}
 
@@ -58,11 +58,12 @@ function Source:new()
 end
 
 function Source:complete(_, callback)
-	vim.api.nvim_create_autocmd("BufWritePost", {
-		-- pattern = { "*.css", "*.scss", "*.sass", "*.less" },
-		pattern = self.file_extensions,
-		command = ":silent !cmp run",
-	})
+	-- TODO remove this autocmd bcz doesn't do anything
+	-- vim.api.nvim_create_autocmd("BufWritePost", {
+	-- 	-- pattern = { "*.css", "*.scss", "*.sass", "*.less" },
+	-- 	pattern = self.file_extensions,
+	-- 	command = ":silent !cmp run",
+	-- })
 
 	self.items = {}
 

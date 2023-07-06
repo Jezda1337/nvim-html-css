@@ -1,9 +1,9 @@
 local M = {}
+
 local a = require("plenary.async")
 local c = require("plenary.curl")
 local u = require("html-css.utils.init")
 local cmp = require("cmp")
-
 local ts = vim.treesitter
 
 ---@type table<item>[]
@@ -45,7 +45,10 @@ M.init = a.wrap(function(url, cb)
 		if not status == 200 then
 			return {}
 		end
-		classes = {} -- clean prev classes
+
+		-- clean tables to avoid duplications
+		classes = {}
+		unique_class = {}
 
 		local parser = ts.get_string_parser(body, "css", nil)
 		local tree = parser:parse()[1]
@@ -59,7 +62,7 @@ M.init = a.wrap(function(url, cb)
 		end
 
 		local unique_list = u.unique_list(unique_class)
-
+		classes = {} -- testing
 		for _, class in ipairs(unique_list) do
 			table.insert(classes, {
 				label = class,

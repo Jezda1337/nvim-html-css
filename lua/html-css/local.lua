@@ -9,9 +9,11 @@ local classes = {}
 M.read_local_files = a.wrap(function(file_extensions, cb)
 	local files = {}
 
+	-- TODO needs to be removed
 	-- j:new({
 	-- 	command = "fd",
 	-- args = {
+
 	-- 	"-a",
 	-- 	"-e",
 	-- 	"css",
