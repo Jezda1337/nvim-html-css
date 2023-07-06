@@ -51,7 +51,6 @@ M.read_html_files = a.wrap(function(cb)
 			for _, matches, _ in query:iter_matches(root, data, 0, 0, {}) do
 				local class = matches[1]
 				local class_name = ts.get_node_text(class, data)
-				print(class_name)
 				table.insert(unique_class, class_name)
 			end
 
