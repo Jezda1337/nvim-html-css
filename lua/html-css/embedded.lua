@@ -10,12 +10,17 @@ local ts = vim.treesitter
 
 ---@type item[]
 local classes = {}
+local ids = {}
 ---@type string[]
 local unique_class = {}
+local unique_ids = {}
 
 -- treesitter query for extracting css clasess
 local qs = [[
-	(class_selector (class_name) @class-name)
+	(id_selector
+		(id_name)@id_name)
+	(class_selector
+		(class_name)@class_name)
 ]]
 
 -- TODO change name of the function to something better
@@ -26,10 +31,10 @@ M.read_html_files = a.wrap(function(cb)
 	}):sync()
 
 	if #files == 0 then
-		return nil
+		return
 	else
 		for _, file in ipairs(files) do
-			---@ type string
+			---@type string
 			local file_name = u.get_file_name(file, "[^/]+$")
 
 			-- reading html files
@@ -40,7 +45,9 @@ M.read_html_files = a.wrap(function(cb)
 
 			-- clean tables to avoid duplications
 			classes = {}
+			ids = {}
 			unique_class = {}
+			unique_ids = {}
 
 			-- extrac classes from embedded styles using tree-sitter
 			local parser = ts.get_string_parser(data, "css")
@@ -49,13 +56,19 @@ M.read_html_files = a.wrap(function(cb)
 			local query = ts.query.parse("css", qs)
 
 			for _, matches, _ in query:iter_matches(root, data, 0, 0, {}) do
-				local class = matches[1]
-				local class_name = ts.get_node_text(class, data)
-				table.insert(unique_class, class_name)
+				for _, node in pairs(matches) do
+					if node:type() == "id_name" then
+						local id_name = ts.get_node_text(node, data)
+						table.insert(unique_ids, id_name)
+					else
+						local class_name = ts.get_node_text(node, data)
+						table.insert(unique_class, class_name)
+					end
+				end
 			end
 
-			local unique_list = u.unique_list(unique_class)
-			for _, class in ipairs(unique_list) do
+			local unique_classes_list = u.unique_list(unique_class)
+			for _, class in ipairs(unique_classes_list) do
 				table.insert(classes, {
 					label = class,
 					kind = cmp.lsp.CompletionItemKind.Enum,
@@ -63,7 +76,16 @@ M.read_html_files = a.wrap(function(cb)
 				})
 			end
 
-			cb(classes)
+			local unique_ids_list = u.unique_list(unique_ids)
+			for _, id in ipairs(unique_ids_list) do
+				table.insert(ids, {
+					label = id,
+					kind = cmp.lsp.CompletionItemKind.Enum,
+					menu = file_name,
+				})
+			end
+
+			cb(classes, ids)
 		end
 	end
 end, 1)

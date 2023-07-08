@@ -4,6 +4,7 @@ local a = require("plenary.async")
 local r = require("html-css.remote")
 local l = require("html-css.local")
 local e = require("html-css.embedded")
+local ts = vim.treesitter
 
 function Source:setup()
 	require("cmp").register_source(self.source_name, Source)
@@ -14,11 +15,12 @@ function Source:new()
 	self.isRemote = "^https?://"
 	self.remote_classes = {}
 	self.items = {}
+	self.ids = {}
 
 	-- reading user config
 	self.user_config = config.get_source_config(self.source_name) or {}
 	self.option = self.user_config.option or {}
-	self.file_extensions = self.option.file_extensions or { "css", "scss", "less", "sass" } -- remove default options
+	self.file_extensions = self.option.file_extensions or {}
 	self.style_sheets = self.option.style_sheets or {}
 	self.enable_on = self.option.enable_on or {}
 
@@ -38,18 +40,25 @@ function Source:new()
 
 	-- handle embedded styles
 	a.run(function()
-		e.read_html_files(function(classes)
+		e.read_html_files(function(classes, ids)
 			for _, class in ipairs(classes) do
 				table.insert(self.items, class)
+			end
+
+			for _, id in ipairs(ids) do
+				table.insert(self.ids, id)
 			end
 		end)
 	end)
 
 	-- read all local files on start
 	a.run(function()
-		l.read_local_files(self.file_extensions, function(classes)
+		l.read_local_files(self.file_extensions, function(classes, ids)
 			for _, class in ipairs(classes) do
 				table.insert(self.items, class)
+			end
+			for _, id in ipairs(ids) do
+				table.insert(self.ids, id)
 			end
 		end)
 	end)
@@ -58,40 +67,47 @@ function Source:new()
 end
 
 function Source:complete(_, callback)
-	-- TODO remove this autocmd bcz doesn't do anything
-	-- vim.api.nvim_create_autocmd("BufWritePost", {
-	-- 	-- pattern = { "*.css", "*.scss", "*.sass", "*.less" },
-	-- 	pattern = self.file_extensions,
-	-- 	command = ":silent !cmp run",
-	-- })
-
 	self.items = {}
+	self.ids = {}
 
 	-- handle embedded styles
 	a.run(function()
-		e.read_html_files(function(classes)
+		e.read_html_files(function(classes, ids)
 			for _, class in ipairs(classes) do
 				table.insert(self.items, class)
+			end
+			for _, id in ipairs(ids) do
+				table.insert(self.ids, id)
 			end
 		end)
 	end)
 
 	-- read all local files on start
 	a.run(function()
-		l.read_local_files(self.file_extensions, function(classes)
+		l.read_local_files(self.file_extensions, function(classes, ids)
 			for _, class in ipairs(classes) do
 				table.insert(self.items, class)
+			end
+			for _, id in ipairs(ids) do
+				table.insert(self.ids, id)
 			end
 		end)
 		for _, class in ipairs(self.remote_classes) do
 			table.insert(self.items, class)
 		end
 	end)
-	callback({ items = self.items, isComplete = false })
+
+	if self.current_selector == "class" then
+		callback({ items = self.items, isComplete = false })
+	else
+		if self.current_selector == "id" then
+			callback({ items = self.ids, isComplete = false })
+		end
+	end
 end
 
 function Source:is_available()
-	if not next(self.option) then
+	if not next(self.user_config) then
 		return false
 	end
 
@@ -99,32 +115,35 @@ function Source:is_available()
 		return false
 	end
 
-	local line = vim.api.nvim_get_current_line()
+	local inside_quotes = ts.get_node({ bfnr = 0 })
 
-	if line:match('class%s-=%s-".-"') or line:match('className%s-=%s-".-"') then
-		local cursor_pos = vim.api.nvim_win_get_cursor(0)
-		local class_start_pos, class_end_pos = line:find('class%s-=%s-".-"')
-		local className_start_pos, className_end_pos = line:find('className%s-=%s-".-"')
-
-		if
-			(
-				class_start_pos
-				and class_end_pos
-				and cursor_pos[2] > class_start_pos
-				and cursor_pos[2] <= class_end_pos
-			)
-			or (
-				className_start_pos
-				and className_end_pos
-				and cursor_pos[2] > className_start_pos
-				and cursor_pos[2] <= className_end_pos
-			)
-		then
-			return true
-		else
-			return false
-		end
+	if inside_quotes == nil then
+		return false
 	end
+
+	local type = inside_quotes:type()
+
+	local prev_sibling = inside_quotes:prev_named_sibling()
+	if prev_sibling == nil then
+		return false
+	end
+
+	local prev_sibling_name = ts.get_node_text(prev_sibling, 0)
+
+	if prev_sibling_name == "class" then
+		self.current_selector = "class"
+	elseif prev_sibling_name == "id" then
+		self.current_selector = "id"
+	end
+
+	if
+		prev_sibling_name == "class"
+		or prev_sibling_name == "id" and type == "quoted_attribute_value"
+	then
+		return true
+	end
+
+	return false
 end
 
 return Source:new()
