@@ -4,7 +4,15 @@ local a = require("plenary.async")
 local r = require("html-css.remote")
 local l = require("html-css.local")
 local e = require("html-css.embedded")
+local h = require("html-css.hrefs")
 local ts = vim.treesitter
+
+local function mrgtbls(t1, t2)
+	for _, v in ipairs(t2) do
+		table.insert(t1, v)
+	end
+	return t1
+end
 
 function Source:setup()
 	require("cmp").register_source(self.source_name, Source)
@@ -23,6 +31,9 @@ function Source:new()
 	self.file_extensions = self.option.file_extensions or {}
 	self.style_sheets = self.option.style_sheets or {}
 	self.enable_on = self.option.enable_on or {}
+	self.href_links = h.get_hrefs()
+
+	self.style_sheets = mrgtbls(self.style_sheets, self.href_links) -- merge lings together
 
 	-- init the remote styles
 	for _, url in ipairs(self.style_sheets) do
@@ -44,7 +55,6 @@ function Source:new()
 			for _, class in ipairs(classes) do
 				table.insert(self.items, class)
 			end
-
 			for _, id in ipairs(ids) do
 				table.insert(self.ids, id)
 			end
@@ -137,8 +147,7 @@ function Source:is_available()
 	end
 
 	if
-		prev_sibling_name == "class"
-		or prev_sibling_name == "id" and type == "quoted_attribute_value"
+			prev_sibling_name == "class" or prev_sibling_name == "id" and type == "quoted_attribute_value"
 	then
 		return true
 	end

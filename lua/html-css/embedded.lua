@@ -1,7 +1,9 @@
 -- embedded styles are all styles between <style></style> tags
 -- inside .html files
 
-local M = {}
+local M = {
+	links = {},
+}
 local j = require("plenary.job")
 local u = require("html-css.utils.init")
 local a = require("plenary.async")
@@ -21,6 +23,13 @@ local qs = [[
 		(id_name)@id_name)
 	(class_selector
 		(class_name)@class_name)
+]]
+
+local qs_href = [[
+(attribute
+	(attribute_name) @att_name (#eq? @att_name "href")
+	(quoted_attribute_value
+		(attribute_value) @att_val))
 ]]
 
 -- TODO change name of the function to something better
