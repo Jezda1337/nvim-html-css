@@ -43,6 +43,12 @@ M.read_local_files = a.wrap(function(file_extensions, cb)
 			local data = fd:read("*a")
 			fd:close()
 
+			-- reading html files
+			-- local _, fd = a.uv.fs_open(file, "r", 438)
+			-- local _, stat = a.uv.fs_fstat(fd)
+			-- local _, data = a.uv.fs_read(fd, stat.size, 0)
+			-- a.uv.fs_close(fd)
+
 			classes = {} -- clean up prev classes
 			ids = {}
 			unique_class = {}

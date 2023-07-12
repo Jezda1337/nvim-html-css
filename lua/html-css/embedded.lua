@@ -25,13 +25,6 @@ local qs = [[
 		(class_name)@class_name)
 ]]
 
-local qs_href = [[
-(attribute
-	(attribute_name) @att_name (#eq? @att_name "href")
-	(quoted_attribute_value
-		(attribute_value) @att_val))
-]]
-
 -- TODO change name of the function to something better
 M.read_html_files = a.wrap(function(cb)
 	local files = j:new({

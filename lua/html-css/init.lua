@@ -1,10 +1,12 @@
 local Source = {}
 local config = require("cmp.config")
 local a = require("plenary.async")
+local Job = require("plenary.job")
 local r = require("html-css.remote")
 local l = require("html-css.local")
 local e = require("html-css.embedded")
 local h = require("html-css.hrefs")
+
 local ts = vim.treesitter
 
 local function mrgtbls(t1, t2)
@@ -24,6 +26,7 @@ function Source:new()
 	self.remote_classes = {}
 	self.items = {}
 	self.ids = {}
+	self.href_links = {}
 
 	-- reading user config
 	self.user_config = config.get_source_config(self.source_name) or {}
@@ -31,47 +34,56 @@ function Source:new()
 	self.file_extensions = self.option.file_extensions or {}
 	self.style_sheets = self.option.style_sheets or {}
 	self.enable_on = self.option.enable_on or {}
-	self.href_links = h.get_hrefs()
 
-	self.style_sheets = mrgtbls(self.style_sheets, self.href_links) -- merge lings together
+	-- Get the current working directory
+	local current_directory = vim.fn.getcwd()
 
-	-- init the remote styles
-	for _, url in ipairs(self.style_sheets) do
-		if url:match(self.isRemote) then
-			a.run(function()
-				r.init(url, function(classes)
-					for _, class in ipairs(classes) do
-						table.insert(self.items, class)
-						table.insert(self.remote_classes, class)
-					end
+	-- Check if the current directory contains a .git folder
+	local git_folder_exists = vim.fn.isdirectory(current_directory .. "/.git")
+
+	if git_folder_exists == 1 then
+		self.href_links = h.get_hrefs()
+
+		self.style_sheets = mrgtbls(self.style_sheets, self.href_links) -- merge lings together
+
+		-- init the remote styles
+		for _, url in ipairs(self.style_sheets) do
+			if url:match(self.isRemote) then
+				a.run(function()
+					r.init(url, function(classes)
+						for _, class in ipairs(classes) do
+							table.insert(self.items, class)
+							table.insert(self.remote_classes, class)
+						end
+					end)
 				end)
-			end)
+			end
 		end
+
+		-- handle embedded styles
+		a.run(function()
+			e.read_html_files(function(classes, ids)
+				for _, class in ipairs(classes) do
+					table.insert(self.items, class)
+				end
+				for _, id in ipairs(ids) do
+					table.insert(self.ids, id)
+				end
+			end)
+		end)
+
+		-- read all local files on start
+		a.run(function()
+			l.read_local_files(self.file_extensions, function(classes, ids)
+				for _, class in ipairs(classes) do
+					table.insert(self.items, class)
+				end
+				for _, id in ipairs(ids) do
+					table.insert(self.ids, id)
+				end
+			end)
+		end)
 	end
-
-	-- handle embedded styles
-	a.run(function()
-		e.read_html_files(function(classes, ids)
-			for _, class in ipairs(classes) do
-				table.insert(self.items, class)
-			end
-			for _, id in ipairs(ids) do
-				table.insert(self.ids, id)
-			end
-		end)
-	end)
-
-	-- read all local files on start
-	a.run(function()
-		l.read_local_files(self.file_extensions, function(classes, ids)
-			for _, class in ipairs(classes) do
-				table.insert(self.items, class)
-			end
-			for _, id in ipairs(ids) do
-				table.insert(self.ids, id)
-			end
-		end)
-	end)
 
 	return self
 end
@@ -147,7 +159,7 @@ function Source:is_available()
 	end
 
 	if
-			prev_sibling_name == "class" or prev_sibling_name == "id" and type == "quoted_attribute_value"
+		prev_sibling_name == "class" or prev_sibling_name == "id" and type == "quoted_attribute_value"
 	then
 		return true
 	end

@@ -62,7 +62,6 @@ M.init = a.wrap(function(url, cb)
 		end
 
 		local unique_list = u.unique_list(unique_class)
-		classes = {} -- testing
 		for _, class in ipairs(unique_list) do
 			table.insert(classes, {
 				label = class,

@@ -1,5 +1,7 @@
 local M = { links = {} }
 local J = require("plenary.job")
+local A = require("plenary.async")
+
 local ts = vim.treesitter
 local isRemote = "^https?://"
 
@@ -10,7 +12,7 @@ local qs = [[
 		(attribute_value) @att_val))
 ]]
 
-function M.get_hrefs()
+M.get_hrefs = function()
 	local files = J:new({
 		command = "fd",
 		args = { "-a", "-e", "html", "--exclude", "node_modules" },
@@ -21,8 +23,17 @@ function M.get_hrefs()
 	else
 		for _, file in ipairs(files) do
 			local fd = io.open(file, "r")
+			if fd == nil then
+				return
+			end
 			local data = fd:read("*a")
 			fd:close()
+
+			-- reading html files
+			-- local _, fd = A.uv.fs_open(file, "r", 438)
+			-- local _, stat = A.uv.fs_fstat(fd)
+			-- local _, data = A.uv.fs_read(fd, stat.size, 0)
+			-- A.uv.fs_close(fd)
 
 			-- html parser for href links
 			local html_parser = ts.get_string_parser(data, "html")

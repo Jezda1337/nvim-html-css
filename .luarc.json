@@ -1,6 +1,8 @@
 {
   "diagnostics": {
-    "disable": true,
+    "disable": [
+            "unused-local"
+        ],
     "globals": [
       "vim"
     ]
