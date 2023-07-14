@@ -89,41 +89,49 @@ function Source:new()
 end
 
 function Source:complete(_, callback)
-	self.items = {}
-	self.ids = {}
+	-- Get the current working directory
+	local current_directory = vim.fn.getcwd()
 
-	-- handle embedded styles
-	a.run(function()
-		e.read_html_files(function(classes, ids)
-			for _, class in ipairs(classes) do
+	-- Check if the current directory contains a .git folder
+	local git_folder_exists = vim.fn.isdirectory(current_directory .. "/.git")
+
+	if git_folder_exists == 1 then
+		self.items = {}
+		self.ids = {}
+
+		-- handle embedded styles
+		a.run(function()
+			e.read_html_files(function(classes, ids)
+				for _, class in ipairs(classes) do
+					table.insert(self.items, class)
+				end
+				for _, id in ipairs(ids) do
+					table.insert(self.ids, id)
+				end
+			end)
+		end)
+
+		-- read all local files on start
+		a.run(function()
+			l.read_local_files(self.file_extensions, function(classes, ids)
+				for _, class in ipairs(classes) do
+					table.insert(self.items, class)
+				end
+				for _, id in ipairs(ids) do
+					table.insert(self.ids, id)
+				end
+			end)
+			for _, class in ipairs(self.remote_classes) do
 				table.insert(self.items, class)
 			end
-			for _, id in ipairs(ids) do
-				table.insert(self.ids, id)
-			end
 		end)
-	end)
 
-	-- read all local files on start
-	a.run(function()
-		l.read_local_files(self.file_extensions, function(classes, ids)
-			for _, class in ipairs(classes) do
-				table.insert(self.items, class)
+		if self.current_selector == "class" then
+			callback({ items = self.items, isComplete = false })
+		else
+			if self.current_selector == "id" then
+				callback({ items = self.ids, isComplete = false })
 			end
-			for _, id in ipairs(ids) do
-				table.insert(self.ids, id)
-			end
-		end)
-		for _, class in ipairs(self.remote_classes) do
-			table.insert(self.items, class)
-		end
-	end)
-
-	if self.current_selector == "class" then
-		callback({ items = self.items, isComplete = false })
-	else
-		if self.current_selector == "id" then
-			callback({ items = self.ids, isComplete = false })
 		end
 	end
 end
@@ -158,9 +166,7 @@ function Source:is_available()
 		self.current_selector = "id"
 	end
 
-	if
-		prev_sibling_name == "class" or prev_sibling_name == "id" and type == "quoted_attribute_value"
-	then
+	if prev_sibling_name == "class" or prev_sibling_name == "id" and type == "quoted_attribute_value" then
 		return true
 	end
 
