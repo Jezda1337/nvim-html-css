@@ -9,6 +9,17 @@ local h = require("html-css.hrefs")
 
 local ts = vim.treesitter
 
+local scan = require("plenary.scandir")
+local rootDir = scan.scan_dir(".", {
+	hidden = true,
+	add_dirs = true,
+	depth = 1,
+	respect_gitignore = true,
+	search_pattern = function(entry)
+		return entry:match("%f[%a]git%f[^%a]") or entry:match("package.json") -- if project contian .git folder or package.json its gonna work
+	end,
+})
+
 local function mrgtbls(t1, t2)
 	for _, v in ipairs(t2) do
 		table.insert(t1, v)
@@ -41,9 +52,9 @@ function Source:new()
 	-- Check if the current directory contains a .git folder
 	local git_folder_exists = vim.fn.isdirectory(current_directory .. "/.git")
 
-	if git_folder_exists == 1 then
+	-- if git_folder_exists == 1 then
+	if vim.tbl_count(rootDir) ~= 0 then
 		self.href_links = h.get_hrefs()
-
 		self.style_sheets = mrgtbls(self.style_sheets, self.href_links) -- merge lings together
 
 		-- init the remote styles
@@ -95,7 +106,8 @@ function Source:complete(_, callback)
 	-- Check if the current directory contains a .git folder
 	local git_folder_exists = vim.fn.isdirectory(current_directory .. "/.git")
 
-	if git_folder_exists == 1 then
+	-- if git_folder_exists == 1 then
+	if vim.tbl_count(rootDir) ~= 0 then
 		self.items = {}
 		self.ids = {}
 
@@ -166,7 +178,9 @@ function Source:is_available()
 		self.current_selector = "id"
 	end
 
-	if prev_sibling_name == "class" or prev_sibling_name == "id" and type == "quoted_attribute_value" then
+	if
+		prev_sibling_name == "class" or prev_sibling_name == "id" and type == "quoted_attribute_value"
+	then
 		return true
 	end
 

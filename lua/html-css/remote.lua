@@ -17,9 +17,6 @@ local qs = [[
 	(class_selector (class_name) @class-name)
 ]]
 
--- (selectors . (class_selector . (class_name) @class-name))
--- (id_name) @id_name
-
 ---@param url string
 ---@param cb function
 ---@async
@@ -27,6 +24,9 @@ local get_remote_styles = a.wrap(function(url, cb)
 	c.get(url, {
 		callback = function(res)
 			cb(res.status, res.body)
+		end,
+		on_error = function(err)
+			print("[html-css] Unable to connect to the URL:", url)
 		end,
 	})
 end, 2)
