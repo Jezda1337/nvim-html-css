@@ -101,7 +101,7 @@ require("cmp").setup({
     formatting = {
         format = function(entry, vim_item)
             if entry.source.name == "html-css" then
-                vim_item.menu = entry.source.menu
+                vim_item.menu = entry.completion_item.menu
             end
             return vim_item
         end
