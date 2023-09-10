@@ -16,7 +16,9 @@ local rootDir = scan.scan_dir(".", {
 	depth = 1,
 	respect_gitignore = true,
 	search_pattern = function(entry)
-		return entry:match("%f[%a]git%f[^%a]") or entry:match("package.json") -- if project contian .git folder or package.json its gonna work
+		local subEntry = entry:sub(3) -- remove ./
+		-- %f[%a]git%f[^%a] -- old regex for matching .git
+		return subEntry:match(".git") or subEntry:match("package.json") -- if project contian .git folder or package.json its gonna work
 	end,
 })
 
