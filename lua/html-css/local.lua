@@ -20,17 +20,22 @@ local qs = [[
 ---@async
 M.read_local_files = a.wrap(function(file_extensions, cb)
 	local files = {}
+	local fa = { "-a" }
 
 	-- WARNING need to check for performance in larger projects
 	for _, extension in ipairs(file_extensions) do
-		j:new({
-			command = "fd",
-			args = { "-a", "-e", "" .. extension .. "", "--exclude", "node_modules" },
-			on_stdout = function(_, data)
-				table.insert(files, data)
-			end,
-		}):sync()
+		table.insert(fa, "-e")
+		table.insert(fa, extension)
 	end
+	table.insert(fa, "--exclude")
+	table.insert(fa, "node_modules")
+	j:new({
+		command = "fd",
+		args = fa,
+		on_stdout = function(_, data)
+			table.insert(files, data)
+		end,
+	}):sync()
 
 	if #files == 0 then
 		return
