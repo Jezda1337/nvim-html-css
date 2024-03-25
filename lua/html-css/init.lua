@@ -159,7 +159,7 @@ function Source:is_available()
 		return false
 	end
 
-	local inside_quotes = ts.get_node({ bfnr = 0 })
+	local inside_quotes = ts.get_node({ bfnr = 0, lang = "html" })
 
 	if inside_quotes == nil then
 		return false
