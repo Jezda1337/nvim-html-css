@@ -13,47 +13,47 @@ local qs = [[
 ]]
 
 M.get_hrefs = function()
-	local files = J:new({
-		command = "fd",
-		args = { "-a", "-e", "html", "--exclude", "node_modules" },
-	}):sync()
+  local files = J:new({
+    command = "fd",
+    args = { "-a", "-e", "html", "--exclude", "node_modules" },
+  }):sync()
 
-	if #files == 0 then
-		return {}
-	else
-		for _, file in ipairs(files) do
-			local fd = io.open(file, "r")
-			if fd == nil then
-				return
-			end
-			local data = fd:read("*a")
-			fd:close()
+  if #files == 0 then
+    return {}
+  else
+    for _, file in ipairs(files) do
+      local fd = io.open(file, "r")
+      if fd == nil then
+        return
+      end
+      local data = fd:read("*a")
+      fd:close()
 
-			-- reading html files
-			-- local _, fd = A.uv.fs_open(file, "r", 438)
-			-- local _, stat = A.uv.fs_fstat(fd)
-			-- local _, data = A.uv.fs_read(fd, stat.size, 0)
-			-- A.uv.fs_close(fd)
+      -- reading html files
+      -- local _, fd = A.uv.fs_open(file, "r", 438)
+      -- local _, stat = A.uv.fs_fstat(fd)
+      -- local _, data = A.uv.fs_read(fd, stat.size, 0)
+      -- A.uv.fs_close(fd)
 
-			-- html parser for href links
-			local html_parser = ts.get_string_parser(data, "html")
-			local html_tree = html_parser:parse()[1]
-			local html_root = html_tree:root()
-			local href_query = ts.query.parse("html", qs)
+      -- html parser for href links
+      local html_parser = ts.get_string_parser(data, "html")
+      local html_tree = html_parser:parse()[1]
+      local html_root = html_tree:root()
+      local href_query = ts.query.parse("html", qs)
 
-			for _, matches, _ in href_query:iter_matches(html_root, data, 0, 0, {}) do
-				for _, node in pairs(matches) do
-					if node:type() == "attribute_value" then
-						local href_value = ts.get_node_text(node, data)
-						if href_value:match(isRemote) then
-							table.insert(M.links, href_value)
-						end
-					end
-				end
-			end
-		end
-	end
-	return M.links
+      for _, matches, _ in href_query:iter_matches(html_root, data, 0, 0, {}) do
+        for _, node in pairs(matches) do
+          if node:type() == "attribute_value" then
+            local href_value = ts.get_node_text(node, data)
+            if href_value:match(isRemote) then
+              table.insert(M.links, href_value)
+            end
+          end
+        end
+      end
+    end
+  end
+  return M.links
 end
 
 return M
