@@ -140,8 +140,6 @@ function Source:complete(_, callback)
       end
     end)
 
-    print(self.current_selector)
-
     if self.current_selector == "class" or self.current_selector == "className" then
       callback({ items = self.items, isComplete = false })
     else
