@@ -79,12 +79,11 @@ option = {
 
 explanation and types for options.
 
-| Property        |  Type  | Description                                                                                                     |
-| :-------------- | :----: | :-------------------------------------------------------------------------------------------------------------- |
-| max_count       | number | Max item in cmp menu                                                                                            |
-| enable_on       | table  | Table accepts strings, one string one extension in which the plugin will be available                           |
-| file_extensions | table  | Table accepts strings, extensions that you enter, classes that will be available to you will be read from them. |
-| style_sheets    | table  | External cdn css styles such as bootstrap or bulma. The link must be valid. Can be minified version or normal.  |
+| Property        | Type  | Description                                                                                                     |
+| :-------------- | :---: | :-------------------------------------------------------------------------------------------------------------- |
+| enable_on       | table | Table accepts strings, one string one extension in which the plugin will be available                           |
+| file_extensions | table | Table accepts strings, extensions that you enter, classes that will be available to you will be read from them. |
+| style_sheets    | table | External cdn css styles such as bootstrap or bulma. The link must be valid. Can be minified version or normal.  |
 
 ## 🤩 Pretty Menu Items
 
