@@ -1,16 +1,12 @@
 {
   "diagnostics": {
-    "disable": [
-            "unused-local"
-        ],
-    "globals": [
-      "vim"
-    ]
+    "disable": ["unused-local"],
+    "globals": ["vim"]
   },
-    "workspace.library": [
-        "/Users/radojejezdic/.local/share/nvim/lazy/neodev.nvim/types/nightly",
-        "/opt/homebrew/Cellar/neovim/HEAD-7c66120/share/nvim/runtime/lua",
-        "/Users/radojejezdic/Desktop/github/nvim-html-css/lua",
-        "${3rd}/luv/library"
-    ]
+  "workspace.library": [
+    "/Users/radojejezdic/.local/share/nvim/lazy/neodev.nvim/types/nightly",
+    "/opt/homebrew/Cellar/neovim/HEAD-7c66120/share/nvim/runtime/lua",
+    "/Users/radojejezdic/Desktop/github/nvim-html-css/lua",
+    "${3rd}/luv/library"
+  ]
 }
