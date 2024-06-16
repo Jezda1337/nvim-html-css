@@ -4,9 +4,8 @@
     "globals": ["vim"]
   },
   "workspace.library": [
-    "/Users/radojejezdic/.local/share/nvim/lazy/neodev.nvim/types/nightly",
-    "/opt/homebrew/Cellar/neovim/HEAD-7c66120/share/nvim/runtime/lua",
-    "/Users/radojejezdic/Desktop/github/nvim-html-css/lua",
-    "${3rd}/luv/library"
-  ]
+    "${3rd}/luv/library",
+    "~/.local/share/nvim/lazy/luvit-meta/library"
+  ],
+  "hint.enable": true
 }

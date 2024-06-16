@@ -42,11 +42,10 @@ M.href = function()
 end
 
 ---@param data string
----@return Selector[]
 M.selectors = function(data)
 	local selectors = {
 		ids = {},
-		classess = {},
+		classes = {},
 	}
 	local unique_classes = {}
 	local unique_ids = {}
@@ -78,7 +77,7 @@ M.selectors = function(data)
 	end
 
 	for class_name in pairs(unique_classes) do
-		table.insert(selectors.classess, {
+		table.insert(selectors.classes, {
 			label = class_name,
 			kind = cmp.lsp.CompletionItemKind.Enum,
 		})

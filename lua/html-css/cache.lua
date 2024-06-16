@@ -32,8 +32,11 @@ end
 ---@param bufnr number
 function M:set(bufnr, key, value)
 	if not self.cache[bufnr] then
-		return nil
+		self.cache[bufnr] = {
+			[key] = {},
+		}
 	end
+
 	self.cache[bufnr][key] = value
 end
 
