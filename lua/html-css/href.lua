@@ -16,7 +16,7 @@ end
 
 ---@param bufnr number
 ---@return Link[]
-M.collect_links = function(bufnr)
+local function collect_links(bufnr)
 	local links = cache:get(bufnr, "links") or {}
 	for _, link in pairs(extractor.href()) do
 		if not url_exists(link.url, links) then
@@ -34,7 +34,7 @@ M.init = function(bufnr, file_name)
 		ids = cache:get(bufnr, "ids") or {},
 	}
 
-	local links = M.collect_links(bufnr)
+	local links = collect_links(bufnr)
 
 	---@type fun(ctx: Ctx)
 	local function extractDataFromLinks(ctx)

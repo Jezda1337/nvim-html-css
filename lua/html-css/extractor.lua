@@ -4,18 +4,17 @@ local ts = vim.treesitter
 local q = require("html-css.querys")
 local cmp = require("cmp")
 
----@return string
----@param provider string
-M.provider_name = function(provider)
+---@type fun(provider: string): string
+local function provider_name(provider)
 	local pattern = "[^/]+$"
 	return provider:match(pattern)
 end
 
 ---@param url string
 ---@return string
-M.is_link = function(url)
-	local isRemote = "^https?://"
-	return url:match(isRemote)
+local function is_link(url)
+	local is_remote = "^https?://"
+	return url:match(is_remote)
 end
 
 ---@return Link[]
@@ -29,7 +28,7 @@ M.href = function()
 	local qp = ts.query.parse("html", q.general_link_href)
 	for _, c, _ in qp:iter_matches(root, 0) do
 		local url = ts.get_node_text(c[3], 0)
-		if M.is_link(url) then
+		if is_link(url) then
 			table.insert(links, {
 				url = url,
 				fetched = false,
