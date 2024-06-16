@@ -17,14 +17,7 @@ function M:setup()
 	vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre" }, {
 		pattern = enable_on_dto,
 		callback = function(event)
-			local bufnr = event.buf
-			cache:set(bufnr, "file_name", event.file)
-			cache:set(bufnr, "buf", bufnr)
-
-			---@param data any
-			href(function(data)
-				print(vim.inspect(cache:get(bufnr, "links")))
-			end)
+			href(event.buf, event.file)
 		end,
 	})
 	require("cmp").register_source("html-css", source)
