@@ -19,7 +19,6 @@ local config = require("cmp.config")
 function M:setup()
 	local opt = config.get_source_config(source_name).option
 
-	print(vim.inspect(opt))
 	vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre" }, {
 		pattern = enable_on_dto,
 		callback = function(event)

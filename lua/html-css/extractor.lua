@@ -10,17 +10,24 @@ local function provider_name(provider)
 	return provider:match(pattern)
 end
 
----@param url string
----@return string
+---@type fun(url: string): boolean
 local function is_link(url)
 	local is_remote = "^https?://"
-	return url:match(is_remote)
+	return url:match(is_remote) ~= nil
 end
 
----@return Link[]
+---@type fun(url: string): boolean
+local function is_local(url)
+	return not is_link(url)
+end
+
+---@type fun(): {remote: Link[], locals: Link[]}
 M.href = function()
 	---@type Link[]
-	local links = {}
+	local links = {
+		remote = {},
+		locals = {},
+	}
 
 	local parser = ts.get_parser(0, "html")
 	local parse = parser:parse()
@@ -29,10 +36,16 @@ M.href = function()
 	for _, c, _ in qp:iter_matches(root, 0) do
 		local url = ts.get_node_text(c[3], 0)
 		if is_link(url) then
-			table.insert(links, {
+			table.insert(links.remote, {
 				url = url,
 				fetched = false,
-				provider = M.provider_name(url),
+				provider = provider_name(url),
+			})
+		elseif is_local(url) then
+			table.insert(links.locals, {
+				path = url,
+				parsed = false,
+				provider = provider_name(url),
 			})
 		end
 	end
@@ -46,8 +59,10 @@ M.selectors = function(data)
 		ids = {},
 		classes = {},
 	}
-	local unique_classes = {}
-	local unique_ids = {}
+	local unique_selectors = {
+		ids = {},
+		classes = {},
+	}
 
 	local parser = ts.get_string_parser(data, "css")
 	local tree = parser:parse()[1]
@@ -61,21 +76,21 @@ M.selectors = function(data)
 			local name = ts.get_node_text(node, data)
 
 			if capture_name == "id_name" then
-				unique_ids[name] = true
+				unique_selectors.ids[name] = true
 			elseif capture_name == "class_name" then
-				unique_classes[name] = true
+				unique_selectors.classes[name] = true
 			end
 		end
 	end
 
-	for id_name in pairs(unique_ids) do
+	for id_name in pairs(unique_selectors.ids) do
 		table.insert(selectors.ids, {
 			label = id_name,
 			kind = cmp.lsp.CompletionItemKind.Enum,
 		})
 	end
 
-	for class_name in pairs(unique_classes) do
+	for class_name in pairs(unique_selectors.classes) do
 		table.insert(selectors.classes, {
 			label = class_name,
 			kind = cmp.lsp.CompletionItemKind.Enum,

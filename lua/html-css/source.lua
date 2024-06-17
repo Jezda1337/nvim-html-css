@@ -11,7 +11,15 @@ end
 
 function source:is_available()
 	local bufnr = vim.api.nvim_get_current_buf()
-	self.items = cache:get(bufnr, "classes")
+	local selectors = cache:get(bufnr, "selectors")
+		or {
+			classes = {},
+			ids = {},
+		}
+
+	if #selectors > 0 then
+		self.items = cache:get(bufnr, "selectors").classes
+	end
 	return true
 end
 
