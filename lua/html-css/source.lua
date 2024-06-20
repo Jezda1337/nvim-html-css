@@ -2,6 +2,10 @@ local store = require("html-css.store")
 ---@type Source
 local source = {}
 
+local tsu = require("nvim-treesitter.ts_utils")
+local parsers = require("nvim-treesitter.parsers")
+local ts = vim.treesitter
+
 source.items = {}
 
 function source:complete(_, callback)
@@ -9,14 +13,73 @@ function source:complete(_, callback)
 end
 
 function source:is_available()
-	local bufnr = vim.api.nvim_get_current_buf()
-	-- pickup the selectors and store them in items
-	if store.has(bufnr, "selectors") then
-		local selectors = store.get(bufnr, "selectors")
-		self.items = selectors.classes
-		return true
+	local node_at_cursor = tsu.get_node_at_cursor()
+
+	if not node_at_cursor then
+		return false
 	end
-	return false
+
+	local bufnr = vim.api.nvim_get_current_buf()
+	local current_selector = nil
+	local parser = parsers.get_parser(bufnr)
+	local current_node = tsu.get_node_at_cursor()
+	local lang = parser:lang()
+
+	local is_available = false
+
+	if store.has(bufnr) then
+		while current_node do
+			if lang == "html" or lang == "svelte" or lang == "vue" then
+				if current_node:type() == "attribute_name" then
+					local identifier_name = ts.get_node_text(current_node, 0)
+					if
+						identifier_name == "className"
+						or identifier_name == "class"
+						or identifier_name == "id"
+					then
+						current_selector = identifier_name
+						is_available = true
+					end
+					break
+				end
+				current_node = current_node:prev_named_sibling()
+			else
+				if current_node:type() == "jsx_attribute" then
+					if
+						current_node:child(0):type() == "property_identifier"
+					then
+						local identifier_name =
+							ts.get_node_text(current_node:child(0), 0)
+						if
+							identifier_name == "className"
+							or identifier_name == "class"
+							or identifier_name == "id"
+						then
+							current_selector = identifier_name
+							is_available = true
+						end
+						break
+					end
+				end
+				current_node = current_node:parent()
+			end
+		end
+	end
+
+	if not is_available then
+		return false
+	end
+
+	local selectors = store.get(bufnr, "selectors")
+	if current_selector == "class" or current_selector == "className" then
+		self.items = selectors.classes
+	else
+		if current_selector == "id" then
+			self.items = selectors.ids
+		end
+	end
+
+	return true
 end
 
 return source

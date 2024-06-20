@@ -1,5 +1,4 @@
 local M = {}
-
 ---@type StoreItem[]
 local store = {}
 
@@ -24,7 +23,7 @@ M.get = function(bufnr, key)
 	return store[bufnr][key]
 end
 
----@type fun(bufnr: number, key: string):boolean
+---@type fun(bufnr: number, key: string?):boolean
 M.has = function(bufnr, key)
 	if not store[bufnr] then
 		return false
