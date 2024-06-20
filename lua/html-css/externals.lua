@@ -23,7 +23,7 @@ end
 
 local function url_exists(url, list)
 	for _, link in ipairs(list) do
-		if link.url == url then
+		if link.url == url or link.path == url then
 			return true
 		end
 	end
@@ -39,14 +39,46 @@ local extractDataFromLinks = function(ctx, link, bufnr)
 		}
 
 	if ctx.code == 0 then
-		local extracted_selectors = extractor.selectors(ctx.stdout)
+		local extracted_selectors = extractor.selectors(ctx.stdout, link.url)
 		selectors.classes =
 			vim.list_extend(selectors.classes, extracted_selectors.classes)
 		selectors.ids = vim.list_extend(selectors.ids, extracted_selectors.ids)
 
 		link.fetched = true
+		link.available = true
 		store.set(bufnr, "selectors", selectors)
 	end
+end
+
+---@type fun(bufrn: number, hrefs: Externals , externals: Externals):Externals
+local function remove_missing_hrefs(bufnr, hrefs, externals)
+	local updated_externals = {
+		cdn = {},
+		locals = {},
+	}
+	local selectors = store.get(bufnr, "selectors")
+		or {
+			ids = {},
+			classes = {},
+		}
+
+	for type, external in pairs(externals) do
+		for _, link in ipairs(external) do
+			if url_exists(link.url or link.path, hrefs[type]) then
+				table.insert(updated_externals[type], link)
+			else
+				selectors.classes = vim.tbl_filter(function(class)
+					return class.source ~= (link.url or link.path)
+				end, selectors.classes)
+				selectors.ids = vim.tbl_filter(function(id)
+					return id.source ~= (link.url or link.path)
+				end, selectors.ids)
+			end
+		end
+	end
+
+	store.set(bufnr, "selectors", selectors)
+	return updated_externals
 end
 
 ---@type fun(bufnr: number, file_name: string)
@@ -61,6 +93,8 @@ M.init = function(bufnr, file_name)
 			cdn = {},
 			locals = {},
 		}
+
+	externals = remove_missing_hrefs(bufnr, hrefs, externals)
 
 	-- checking does the url already exist in the store
 	for type, external in pairs(hrefs) do
@@ -89,7 +123,7 @@ M.init = function(bufnr, file_name)
 		if not file.fetched then
 			print("Fetching:", file.path)
 			readFile(file.path, function(data)
-				local extracted_selectors = extractor.selectors(data)
+				local extracted_selectors = extractor.selectors(data, file.path)
 				local selectors = store.get(bufnr, "selectors")
 					or {
 						ids = {},
@@ -103,6 +137,7 @@ M.init = function(bufnr, file_name)
 					vim.list_extend(selectors.ids, extracted_selectors.ids)
 
 				file.fetched = true
+				file.available = true
 				store.set(bufnr, "selectors", selectors)
 			end)
 		end

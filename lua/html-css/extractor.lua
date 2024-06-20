@@ -61,7 +61,8 @@ M.href = function()
 end
 
 ---@param data string
-M.selectors = function(data)
+---@param source string
+M.selectors = function(data, source)
 	local selectors = {
 		ids = {},
 		classes = {},
@@ -94,6 +95,7 @@ M.selectors = function(data)
 		table.insert(selectors.ids, {
 			label = id_name,
 			kind = cmp.lsp.CompletionItemKind.Enum,
+			source = source,
 		})
 	end
 
@@ -101,6 +103,7 @@ M.selectors = function(data)
 		table.insert(selectors.classes, {
 			label = class_name,
 			kind = cmp.lsp.CompletionItemKind.Enum,
+			source = source,
 		})
 	end
 
