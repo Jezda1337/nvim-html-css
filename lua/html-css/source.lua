@@ -1,9 +1,8 @@
+local store = require("html-css.store")
 ---@type Source
-local source = {
-	items = {},
-}
+local source = {}
 
-local cache = require("html-css.cache")
+source.items = {}
 
 function source:complete(_, callback)
 	callback({ items = self.items, isComplete = false })
@@ -11,16 +10,13 @@ end
 
 function source:is_available()
 	local bufnr = vim.api.nvim_get_current_buf()
-	local selectors = cache:get(bufnr, "selectors")
-		or {
-			classes = {},
-			ids = {},
-		}
-
-	if #selectors > 0 then
-		self.items = cache:get(bufnr, "selectors").classes
+	-- pickup the selectors and store them in items
+	if store.has(bufnr, "selectors") then
+		local selectors = store.get(bufnr, "selectors")
+		self.items = selectors.classes
+		return true
 	end
-	return true
+	return false
 end
 
 return source

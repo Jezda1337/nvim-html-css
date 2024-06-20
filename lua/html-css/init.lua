@@ -1,7 +1,6 @@
 local M = {}
-local href = require("html-css.href").init
 local source = require("html-css.source")
-local cache = require("html-css.cache")
+local externals = require("html-css.externals")
 
 ---@type string[]
 local enable_on = { "html" }
@@ -22,7 +21,7 @@ function M:setup()
 	vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre" }, {
 		pattern = enable_on_dto,
 		callback = function(event)
-			href(event.buf, event.file)
+			externals.init(event.buf, event.file)
 		end,
 	})
 	require("cmp").register_source("html-css", source)

@@ -1,11 +1,3 @@
----@class Cache
----@field [number] CacheEntry
-
----@class CacheEntry
----@field file_name string
----@field links Link[]
----@field ids string[]
----@field classes string[]
 
 ---@class Ctx
 ---@field stdout string
@@ -13,20 +5,39 @@
 ---@field signal number
 ---@field stderr string
 
----@class Link
----@field url string
----@field fetched boolean
----@field provider string
-
----@class Selector
----@field type string
----@field label string
----@field kind number
-
 ---@class Source
----@field items Selector[]
----@field ids Selector[]
----@field classes Selector[]
+---@field items Selectors
 ---@field new fun(self: Source, Selectors: Selector[]): Source
 ---@field complete fun(self: Source, arg: any, callback: fun(result: { items: Selector[], isComplete: boolean }))
 ---@field is_available fun(self: Source): boolean
+
+---@class Link
+---@field url string
+---@field available boolean
+---@field fetched boolean
+---@field provider string
+
+---@class LocalItem
+---@field path string
+---@field available boolean
+---@field fetched boolean
+---@field file_name string
+
+---@class Externals
+---@field cdn Link[]
+---@field locals LocalItem[]
+---@field selectors
+
+---@class Selector
+---@field label string
+---@field kind cmp.lsp.CompletionItemKind.Enum
+---@field source string
+
+---@class Selectors
+---@field ids Selector[]?
+---@field classes Selector[]?
+
+---@class StoreItem
+---@field externals Externals?
+---@field file_name string?
+---@field selectors Selectors?
