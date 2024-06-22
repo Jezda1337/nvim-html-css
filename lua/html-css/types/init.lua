@@ -1,4 +1,3 @@
-
 ---@class Ctx
 ---@field stdout string
 ---@field code number
@@ -26,7 +25,6 @@
 ---@class Externals
 ---@field cdn Link[]
 ---@field locals LocalItem[]
----@field selectors
 
 ---@class Selector
 ---@field label string
@@ -41,3 +39,6 @@
 ---@field externals Externals?
 ---@field file_name string?
 ---@field selectors Selectors?
+
+---@class Config
+---@field enable_on string[]

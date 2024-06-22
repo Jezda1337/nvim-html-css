@@ -3,23 +3,7 @@ local M = {}
 local store = require("html-css.store")
 local extractor = require("html-css.extractor")
 local fetch = require("html-css.fetch").fetch
-local uv = vim.loop
-
-local function readFile(path, callback)
-	uv.fs_open(path, "r", 438, function(err, fd)
-		assert(not err, err)
-		uv.fs_fstat(fd, function(err, stat)
-			assert(not err, err)
-			uv.fs_read(fd, stat.size, 0, function(err, data)
-				assert(not err, err)
-				uv.fs_close(fd, function(err)
-					assert(not err, err)
-					return callback(data)
-				end)
-			end)
-		end)
-	end)
-end
+local readFile = require("html-css.helpers").readFile
 
 local function url_exists(url, list)
 	for _, link in ipairs(list) do
