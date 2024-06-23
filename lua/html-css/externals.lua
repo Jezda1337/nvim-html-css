@@ -65,13 +65,12 @@ local function remove_missing_hrefs(bufnr, hrefs, externals)
 	return updated_externals
 end
 
----@type fun(bufnr: number, file_name: string)
-M.init = function(bufnr, file_name)
+---@type fun(bufnr: number, hrefs: Externals)
+M.init = function(bufnr, hrefs)
 	-- so this init fun extract hrefs on enter the buf or save,
 	-- checks does we already  have this in store, and if we does
 	-- then it will skip fetching, if not then we will fetch
 	-- only new href that is added
-	local hrefs = extractor.href()
 	local externals = store.get(bufnr, "externals")
 		or {
 			cdn = {},

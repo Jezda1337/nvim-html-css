@@ -5,10 +5,17 @@ local q = require("html-css.querys")
 local cmp = require("cmp")
 local store = require("html-css.store")
 
----@type fun(provider: string): string
+---@type fun(provider: string): string | nil
 local function provider_name(href_value)
-	local pattern = "[^/]+$"
-	return href_value:match(pattern)
+	local filename = href_value:match("[^/]+%.css$")
+		or href_value:match("[^/]+%.min%.css$")
+	if filename then
+		filename = filename:gsub("%.min%.css$", "")
+		filename = filename:gsub("%.css$", "")
+		filename = filename:gsub("^%l", string.upper)
+		return filename
+	end
+	return nil
 end
 
 local function file_name(href_value)
@@ -96,6 +103,7 @@ M.selectors = function(data, source)
 			label = id_name,
 			kind = cmp.lsp.CompletionItemKind.Enum,
 			source = source,
+			provider = provider_name(source),
 		})
 	end
 
@@ -104,6 +112,7 @@ M.selectors = function(data, source)
 			label = class_name,
 			kind = cmp.lsp.CompletionItemKind.Enum,
 			source = source,
+			provider = provider_name(source),
 		})
 	end
 

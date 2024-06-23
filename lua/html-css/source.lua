@@ -1,12 +1,16 @@
 local store = require("html-css.store")
 ---@type Source
 local source = {}
+source.items = {}
 
 local tsu = require("nvim-treesitter.ts_utils")
 local parsers = require("nvim-treesitter.parsers")
 local ts = vim.treesitter
+local cmp_config = require("cmp.config")
 
-source.items = {}
+local source_name = "html-css"
+---@type Config
+local config = cmp_config.get_source_config(source_name).option or {}
 
 function source:complete(_, callback)
 	callback({ items = self.items, isComplete = false })
@@ -26,6 +30,10 @@ function source:is_available()
 	local lang = parser:lang()
 
 	local is_available = false
+
+	if config.spa.enable then
+		bufnr = 0
+	end
 
 	if store.has(bufnr) then
 		while current_node do

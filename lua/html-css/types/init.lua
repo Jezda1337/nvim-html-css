@@ -42,3 +42,8 @@
 
 ---@class Config
 ---@field enable_on string[]
+---@field spa Spa
+
+---@class Spa
+---@field enable boolean
+---@field entry_file string
