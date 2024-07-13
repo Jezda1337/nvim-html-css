@@ -30,4 +30,11 @@ M.selectors = [[
 		(class_name) @class_name)
 ]]
 
+M.internal_selectors = [[
+	(id_selector
+		(id_name) @id_name)
+	(class_selector
+		(class_name) @class_name)
+]]
+
 return M

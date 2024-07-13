@@ -6,6 +6,7 @@ local spa = require("html-css.spa")
 local cmp_config = require("cmp.config")
 local extractor = require("html-css.extractor")
 local ss = require("html-css.style_sheets")
+local internal = require("html-css.internal")
 
 local source_name = "html-css"
 ---@type Config
@@ -49,6 +50,7 @@ function M:setup()
 		callback = function(event)
 			local hrefs = extractor.href()
 			externals.init(event.buf, hrefs)
+			internal.init(event.buf, event.file)
 		end,
 	})
 end
