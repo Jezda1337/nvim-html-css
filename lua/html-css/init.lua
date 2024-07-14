@@ -12,7 +12,7 @@ local source_name = "html-css"
 ---@type Config
 local config = cmp_config.get_source_config(source_name).option or {}
 ---@type string[]
-local enable_on = config.enable_on or { "html", "css" } -- html is enabled by default
+local enable_on = config.enable_on or { "html" } -- html is enabled by default
 local style_sheets = config.style_sheets or {}
 
 ---@type string[]
