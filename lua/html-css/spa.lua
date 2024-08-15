@@ -40,7 +40,7 @@ end
 local externals = require("html-css.externals")
 M.init = function(entry_file)
 	local file = vim.fn.findfile(entry_file, ".**")
-	if not file then
+	if file == "" then
 		return
 	end
 

@@ -25,18 +25,32 @@ end
 function M:setup()
 	require("cmp").register_source("html-css", source)
 
-	if config.style_sheets ~= nil then
-		vim.api.nvim_create_autocmd({ "VimEnter" }, {
-			pattern = enable_on_dto,
-			callback = function(event)
-				ss.init(style_sheets, event.buf)
-			end,
-		})
+	-- GLOBAL STYLING
+	if not config.spa.enable then
+		if config.style_sheets ~= nil then
+			vim.api.nvim_create_autocmd({ "VimEnter" }, {
+				pattern = enable_on_dto,
+				callback = function(event)
+					print("insert")
+					ss.init(style_sheets, event.buf)
+				end,
+			})
+		end
 	end
 
+	-- SPA
 	if config.spa.enable then
 		vim.api.nvim_create_autocmd({ "VimEnter", "BufWritePre", "WinEnter" }, {
-			pattern = "*",
+			pattern = {
+				"*.js",
+				"*.jsx",
+				"*.ts",
+				"*.tsx",
+				"*.vue",
+				"*.svelte",
+				"*.astro",
+				"*.html",
+			},
 			callback = function()
 				local entry_file = config.spa.entry_file or "index.html"
 				spa.init(entry_file)
@@ -45,14 +59,17 @@ function M:setup()
 		return
 	end
 
-	vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre", "WinEnter" }, {
-		pattern = enable_on_dto,
-		callback = function(event)
-			local hrefs = extractor.href()
-			externals.init(event.buf, hrefs)
-			internal.init(event.buf, event.file)
-		end,
-	})
+	-- GENERAL
+	if not config.spa.enable then
+		vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre", "WinEnter" }, {
+			pattern = enable_on_dto,
+			callback = function(event)
+				local hrefs = extractor.href()
+				externals.init(event.buf, hrefs)
+				internal.init(event.buf, event.file)
+			end,
+		})
+	end
 end
 
 return M

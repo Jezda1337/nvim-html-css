@@ -17,16 +17,14 @@ function source:complete(_, callback)
 end
 
 function source:is_available()
-	local node_at_cursor = tsu.get_node_at_cursor()
-
-	if not node_at_cursor then
+	local current_node = tsu.get_node_at_cursor()
+	if not current_node then
 		return false
 	end
 
 	local bufnr = vim.api.nvim_get_current_buf()
 	local current_selector = nil
 	local parser = parsers.get_parser(bufnr)
-	local current_node = tsu.get_node_at_cursor()
 	local lang = parser:lang()
 
 	local is_available = false
@@ -86,7 +84,6 @@ function source:is_available()
 			self.items = selectors.ids
 		end
 	end
-
 	return true
 end
 
