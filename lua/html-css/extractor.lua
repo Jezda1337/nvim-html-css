@@ -46,7 +46,7 @@ M.href = function()
 	local root = parse[1]:root()
 	local qp = ts.query.parse("html", q.general_link_href)
 	for _, c, _ in qp:iter_matches(root, 0) do
-		local href_value = ts.get_node_text(c[3], 0)
+		local href_value = ts.get_node_text(c[3][1], 0)
 		if is_link(href_value) then
 			table.insert(externals.cdn, {
 				url = href_value,
@@ -88,7 +88,7 @@ M.selectors = function(data, source)
 	for _, matches, _ in query:iter_matches(root, data, 0, 0, {}) do
 		for id, node in pairs(matches) do
 			local capture_name = query.captures[id]
-			local name = ts.get_node_text(node, data)
+			local name = ts.get_node_text(node[1], data)
 
 			if capture_name == "id_name" then
 				unique_selectors.ids[name] = true
