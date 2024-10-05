@@ -31,7 +31,6 @@ function M:setup()
 			vim.api.nvim_create_autocmd({ "VimEnter" }, {
 				pattern = enable_on_dto,
 				callback = function(event)
-					print("insert")
 					ss.init(style_sheets, event.buf)
 				end,
 			})
