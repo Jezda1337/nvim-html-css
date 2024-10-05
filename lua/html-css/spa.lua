@@ -16,7 +16,7 @@ local extract_hrefs_and_locals = function(data)
 	local query = ts.query.parse("html", q.general_link_href)
 
 	for _, captures, _ in query:iter_matches(root, data, 0, 0) do
-		local href_value = ts.get_node_text(captures[3], data)
+		local href_value = ts.get_node_text(captures[3][1], data)
 		if href_value:match("^https?://") then
 			table.insert(externals.cdn, {
 				url = href_value,

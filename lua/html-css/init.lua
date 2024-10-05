@@ -39,22 +39,25 @@ function M:setup()
 
 	-- SPA
 	if config.spa.enable then
-		vim.api.nvim_create_autocmd({ "VimEnter", "BufWritePre", "WinEnter" }, {
-			pattern = {
-				"*.js",
-				"*.jsx",
-				"*.ts",
-				"*.tsx",
-				"*.vue",
-				"*.svelte",
-				"*.astro",
-				"*.html",
-			},
-			callback = function()
-				local entry_file = config.spa.entry_file or "index.html"
-				spa.init(entry_file)
-			end,
-		})
+		vim.api.nvim_create_autocmd(
+			{ "FileType", "VimEnter", "BufWritePre", "WinEnter" },
+			{
+				pattern = {
+					"javascript",
+					"javascriptreact",
+					"typescript",
+					"typescriptreact",
+					"astro",
+					"html",
+					"vue",
+					"svelte",
+				},
+				callback = function()
+					local entry_file = config.spa.entry_file or "index.html"
+					spa.init(entry_file)
+				end,
+			}
+		)
 		return
 	end
 
