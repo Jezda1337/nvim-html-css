@@ -2,7 +2,7 @@ local M = {}
 
 local store = require("html-css.store")
 local extractor = require("html-css.extractor")
-local fetch = require("html-css.fetch").fetch
+local fetcher = require("html-css.fetcher")
 
 ---@type fun(ctx: Ctx, cdn: string, bufnr: number)
 local function extractDataFromLinks(ctx, cdn, bufnr)
@@ -26,7 +26,7 @@ end
 M.init = function(styles, bufnr)
 	for _, style in pairs(styles) do
 		local opts = {}
-		fetch(style, opts, function(ctx)
+		fetcher(style, opts, function(ctx)
 			print("Fetching:", style)
 			extractDataFromLinks(ctx, style, bufnr)
 		end)

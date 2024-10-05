@@ -2,7 +2,7 @@ local M = {}
 
 local store = require("html-css.store")
 local extractor = require("html-css.extractor")
-local fetch = require("html-css.fetch").fetch
+local fetcher = require("html-css.fetcher")
 local readFile = require("html-css.helpers").readFile
 
 local function url_exists(url, list)
@@ -94,7 +94,7 @@ M.init = function(bufnr, hrefs)
 	for _, link in pairs(externals.cdn) do
 		if not link.fetched then
 			local opts = {}
-			fetch(link.url, opts, function(ctx)
+			fetcher(link.url, opts, function(ctx)
 				print("Fetching:", link.url)
 				extractDataFromLinks(ctx, link, bufnr)
 			end)
