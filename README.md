@@ -61,11 +61,11 @@ return require("lazy").setup({
 
 ```lua
 option = {
-    max_count = {}, -- not ready yet
     enable_on = {
         "html"
         ...
     }, -- set the file types you want the plugin to work on
+    dir_to_exclude = { "node_modules" },
     file_extensions = { "css", "sass", "less" }, -- set the local filetypes from which you want to derive classes
     style_sheets = {
         -- example of remote styles, only css no js for now
@@ -82,6 +82,7 @@ explanation and types for options.
 | Property        | Type  | Description                                                                                                     |
 | :-------------- | :---: | :-------------------------------------------------------------------------------------------------------------- |
 | enable_on       | table | Table accepts strings, one string one extension in which the plugin will be available                           |
+| dir_to_exclude  | table | Table accepts strings of directory names to exclude from scanning. Default: ["node_modules"]                    |
 | file_extensions | table | Table accepts strings, extensions that you enter, classes that will be available to you will be read from them. |
 | style_sheets    | table | External cdn css styles such as bootstrap or bulma. The link must be valid. Can be minified version or normal.  |
 
