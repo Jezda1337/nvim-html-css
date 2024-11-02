@@ -7,7 +7,7 @@ local e = require("html-css.embedded")
 local h = require("html-css.hrefs")
 local ts = vim.treesitter
 local tsu = require("nvim-treesitter.ts_utils")
-local parsers = require 'nvim-treesitter.parsers'
+local parsers = require("nvim-treesitter.parsers")
 
 local scan = require("plenary.scandir")
 local rootDir = scan.scan_dir(".", {
@@ -18,8 +18,7 @@ local rootDir = scan.scan_dir(".", {
 	search_pattern = function(entry)
 		local subEntry = entry:sub(3) -- remove ./
 		-- %f[%a]git%f[^%a] -- old regex for matching .git
-		return subEntry:match(".git$") or
-				subEntry:match("package.json") -- if project contains .git folder or package.json its gonna work
+		return subEntry:match(".git$") or subEntry:match("package.json") -- if project contains .git folder or package.json its gonna work
 	end,
 })
 
@@ -46,8 +45,11 @@ function Source:new()
 	self.user_config = config.get_source_config(self.source_name) or {}
 	self.option = self.user_config.option or {}
 	self.file_extensions = self.option.file_extensions or {}
+	self.dir_to_exclude = self.option.dir_to_exclude or {}
 	self.style_sheets = self.option.style_sheets or {}
 	self.enable_on = self.option.enable_on or {}
+
+	table.insert(self.dir_to_exclude, "node_modules") -- node_modules as default dit to be excluded
 
 	-- Get the current working directory
 	local current_directory = vim.fn.getcwd()
@@ -76,7 +78,7 @@ function Source:new()
 
 		-- handle embedded styles
 		a.run(function()
-			e.read_html_files(function(classes, ids)
+			e.read_html_files(self.dir_to_exclude, function(classes, ids)
 				for _, class in ipairs(classes) do
 					table.insert(self.items, class)
 				end
@@ -88,7 +90,7 @@ function Source:new()
 
 		-- read all local files on start
 		a.run(function()
-			l.read_local_files(self.file_extensions, function(classes, ids)
+			l.read_local_files(self.file_extensions, self.dir_to_exclude, function(classes, ids)
 				for _, class in ipairs(classes) do
 					table.insert(self.items, class)
 				end
@@ -109,7 +111,7 @@ function Source:complete(_, callback)
 
 		-- handle embedded styles
 		a.run(function()
-			e.read_html_files(function(classes, ids)
+			e.read_html_files(self.dir_to_exclude, function(classes, ids)
 				for _, class in ipairs(classes) do
 					table.insert(self.items, class)
 				end
@@ -121,7 +123,7 @@ function Source:complete(_, callback)
 
 		-- read all local files on start
 		a.run(function()
-			l.read_local_files(self.file_extensions, function(classes, ids)
+			l.read_local_files(self.file_extensions, self.dir_to_exclude, function(classes, ids)
 				for _, class in ipairs(classes) do
 					table.insert(self.items, class)
 				end
@@ -168,7 +170,11 @@ function Source:is_available()
 		if lang == "html" or lang == "svelte" or lang == "vue" then
 			if current_node:type() == "attribute_name" then
 				local identifier_name = ts.get_node_text(current_node, 0)
-				if identifier_name == "className" or identifier_name == "class" or identifier_name == "id" then
+				if
+					identifier_name == "className"
+					or identifier_name == "class"
+					or identifier_name == "id"
+				then
 					self.current_selector = identifier_name
 					return true
 				end
@@ -179,7 +185,11 @@ function Source:is_available()
 			if current_node:type() == "jsx_attribute" then
 				if current_node:child(0):type() == "property_identifier" then
 					local identifier_name = ts.get_node_text(current_node:child(0), 0)
-					if identifier_name == "className" or identifier_name == "class" or identifier_name == "id" then
+					if
+						identifier_name == "className"
+						or identifier_name == "class"
+						or identifier_name == "id"
+					then
 						self.current_selector = identifier_name
 						return true
 					end

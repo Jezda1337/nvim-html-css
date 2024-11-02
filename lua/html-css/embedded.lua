@@ -26,10 +26,18 @@ local qs = [[
 ]]
 
 -- TODO change name of the function to something better
-M.read_html_files = a.wrap(function(cb)
+---@async
+M.read_html_files = a.wrap(function(dir_to_exclude, cb)
+	local fa = { "-a", "-e", "html" }
+
+	for _, dir in ipairs(dir_to_exclude) do
+		table.insert(fa, "--exclude")
+		table.insert(fa, dir)
+	end
+
 	local files = j:new({
 		command = "fd",
-		args = { "-a", "-e", "html", "--exclude", "node_modules" },
+		args = fa,
 	}):sync()
 
 	if #files == 0 then
@@ -90,6 +98,6 @@ M.read_html_files = a.wrap(function(cb)
 			cb(classes, ids)
 		end
 	end
-end, 1)
+end, 2)
 
 return M
