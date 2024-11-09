@@ -45,22 +45,34 @@ M.href = function()
 	local parse = parser:parse()
 	local root = parse[1]:root()
 	local qp = ts.query.parse("html", q.general_link_href)
-	for _, c, _ in qp:iter_matches(root, 0) do
-		local href_value = ts.get_node_text(c[3][1], 0)
-		if is_link(href_value) then
-			table.insert(externals.cdn, {
-				url = href_value,
-				fetched = false,
-				available = false,
-				provider = provider_name(href_value),
-			})
-		elseif is_local(href_value) then
-			table.insert(externals.locals, {
-				path = href_value,
-				fetched = false,
-				available = false,
-				file_name = file_name(href_value),
-			})
+
+	-- https://neovim.io/doc/user/treesitter.html#Query%3Aiter_matches()
+	-- Query:iter_matches() correctly returns all matching nodes in a match instead of only the last node.
+	-- This means that the returned table maps capture IDs to a list of nodes that need to be iterated over.
+	-- For backwards compatibility, an option all=false (only return the last matching node) is provided that will be removed in a future release.
+	for _, match, _ in qp:iter_matches(root, 0, 0, -1, { all = true }) do
+		for id, nodes in pairs(match) do
+			-- local name = qp.captures[id]
+			for _, node in ipairs(nodes) do
+				if node:type() == "attribute_value" then
+					local href_value = ts.get_node_text(node, 0)
+					if is_link(href_value) then
+						table.insert(externals.cdn, {
+							url = href_value,
+							fetched = false,
+							available = false,
+							provider = provider_name(href_value),
+						})
+					elseif is_local(href_value) then
+						table.insert(externals.locals, {
+							path = href_value,
+							fetched = false,
+							available = false,
+							file_name = file_name(href_value),
+						})
+					end
+				end
+			end
 		end
 	end
 
@@ -80,20 +92,21 @@ M.selectors = function(data, source)
 	}
 
 	local parser = ts.get_string_parser(data, "css")
-	local tree = parser:parse()[1]
-	local root = tree:root()
-
+	local parse = parser:parse()
+	local root = parse[1]:root()
 	local query = ts.query.parse("css", q.selectors)
 
-	for _, matches, _ in query:iter_matches(root, data, 0, 0, {}) do
-		for id, node in pairs(matches) do
-			local capture_name = query.captures[id]
-			local name = ts.get_node_text(node[1], data)
+	for _, match, _ in query:iter_matches(root, data, 0, -1, { all = true }) do
+		for id, nodes in pairs(match) do
+			for _, node in ipairs(nodes) do
+				local capture_name = query.captures[id]
+				local name = ts.get_node_text(node, data)
 
-			if capture_name == "id_name" then
-				unique_selectors.ids[name] = true
-			elseif capture_name == "class_name" then
-				unique_selectors.classes[name] = true
+				if capture_name == "id_name" then
+					unique_selectors.ids[name] = true
+				elseif capture_name == "class_name" then
+					unique_selectors.classes[name] = true
+				end
 			end
 		end
 	end
