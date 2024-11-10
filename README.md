@@ -27,6 +27,10 @@ Neovim CSS Intellisense for HTML
 
 ##### ⚠️ In case your tree-sitter is lazy loaded, you must also lazy load the html-css plugin in the same way as the tree-sitter. Another way is to add dependencies as in the example below.
 
+##### ⚠️ Plugin must be initialized after `nvim-cmp`.
+
+##### ⚠️ `option` table cannot be empty.
+
 ## Lazy
 
 ```lua
