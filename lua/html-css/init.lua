@@ -166,8 +166,15 @@ function Source:is_available()
 	local current_node = node_at_cursor
 	local lang = parser:lang()
 
+	local languagesMap = {
+		html = true,
+		svelte = true,
+		vue = true,
+		astro = true,
+	}
+
 	while current_node do
-		if lang == "html" or lang == "svelte" or lang == "vue" then
+		if languagesMap[lang] then
 			if current_node:type() == "attribute_name" then
 				local identifier_name = ts.get_node_text(current_node, 0)
 				if
