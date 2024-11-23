@@ -17,6 +17,9 @@ function source:complete(_, callback)
 end
 
 function source:is_available()
+	-- Testing is needed with the larget file.
+	-- could be performance issue
+	vim.treesitter.get_parser(0):parse()
 	local current_node = tsu.get_node_at_cursor()
 	if not current_node then
 		return false
