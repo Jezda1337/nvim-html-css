@@ -17,6 +17,11 @@ function source:complete(_, callback)
 end
 
 function source:is_available()
+	local bufnr = vim.api.nvim_get_current_buf()
+	local buftype = vim.api.nvim_get_option_value("buftype", { buf = bufnr })
+	if buftype ~= "" then
+		return false
+	end
 	-- Testing is needed with the larget file.
 	-- could be performance issue
 	vim.treesitter.get_parser(0):parse()
