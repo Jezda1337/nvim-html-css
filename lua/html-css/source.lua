@@ -30,7 +30,6 @@ function source:is_available()
 		return false
 	end
 
-	local bufnr = vim.api.nvim_get_current_buf()
 	local current_selector = nil
 	local parser = parsers.get_parser(bufnr)
 	local lang = parser:lang()
