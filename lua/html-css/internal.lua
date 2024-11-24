@@ -14,6 +14,9 @@ M.init = function(bufnr, file_name)
 			ids = {},
 		}
 
+	local global_stylings = store.get(1, "selectors")
+	selectors = vim.tbl_deep_extend("force", selectors, global_stylings)
+
 	local parser = ts.get_parser(bufnr, "css")
 	local parse = parser:parse()
 	local root = parse[1]:root()

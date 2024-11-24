@@ -26,15 +26,12 @@ function M:setup()
 	require("cmp").register_source("html-css", source)
 
 	-- GLOBAL STYLING
-	if not config.spa.enable then
-		if config.style_sheets ~= nil then
-			vim.api.nvim_create_autocmd({ "VimEnter" }, {
-				pattern = enable_on_dto,
-				callback = function(event)
-					ss.init(style_sheets, event.buf)
-				end,
-			})
-		end
+	if #config.style_sheets ~= 0 then
+		vim.api.nvim_create_autocmd({ "VimEnter" }, {
+			callback = function(event)
+				ss.init(style_sheets, event.buf)
+			end,
+		})
 	end
 
 	-- SPA
