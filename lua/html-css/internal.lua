@@ -21,27 +21,29 @@ M.init = function(bufnr, file_name)
 	local parse = parser:parse()
 	local root = parse[1]:root()
 	local qp = ts.query.parse("css", query)
-	for _, c, _ in qp:iter_matches(root, bufnr) do
-		for _, node in pairs(c) do
-			if node:type() == "id_name" then
-				local val = ts.get_node_text(node, bufnr)
-				if not selectors.ids[val] then
-					table.insert(selectors.ids, {
-						label = val,
-						kind = cmp.lsp.CompletionItemKind.Enum,
-						source = file_name,
-						provider = "mom",
-					})
-				end
-			elseif node:type() == "class_name" then
-				local val = ts.get_node_text(node, bufnr)
-				if not selectors.classes[val] then
-					table.insert(selectors.classes, {
-						label = val,
-						kind = cmp.lsp.CompletionItemKind.Enum,
-						source = file_name,
-						provider = "mom",
-					})
+	for _, match, _ in qp:iter_matches(root, bufnr, 0, -1, { all = true }) do
+		for _, nodes in pairs(match) do
+			for _, node in ipairs(nodes) do
+				if node:type() == "id_name" then
+					local val = ts.get_node_text(node, bufnr)
+					if not selectors.ids[val] then
+						table.insert(selectors.ids, {
+							label = val,
+							kind = cmp.lsp.CompletionItemKind.Enum,
+							source = file_name,
+							provider = "mom",
+						})
+					end
+				elseif node:type() == "class_name" then
+					local val = ts.get_node_text(node, bufnr)
+					if not selectors.classes[val] then
+						table.insert(selectors.classes, {
+							label = val,
+							kind = cmp.lsp.CompletionItemKind.Enum,
+							source = file_name,
+							provider = "mom",
+						})
+					end
 				end
 			end
 		end
