@@ -1,16 +1,27 @@
 local store = require("html-css.store")
 ---@type Source
-local source = {}
-source.items = {}
+local source = {
+	new = function(self)
+		return self
+	end,
+	complete = function(self) end,
+	is_available = function(self)
+		return false
+	end,
+	items = {},
+}
 
 local tsu = require("nvim-treesitter.ts_utils")
 local parsers = require("nvim-treesitter.parsers")
 local ts = vim.treesitter
 local cmp_config = require("cmp.config")
+local config = require("html-css.config")
 
 local source_name = "html-css"
+
 ---@type Config
-local config = cmp_config.get_source_config(source_name).option or {}
+local user_config = cmp_config.get_source_config(source_name).option or {}
+config.setup(user_config) -- override default config with the user_config
 
 function source:complete(_, callback)
 	callback({ items = self.items, isComplete = false })
@@ -19,6 +30,7 @@ end
 function source:is_available()
 	local bufnr = vim.api.nvim_get_current_buf()
 	local buftype = vim.api.nvim_get_option_value("buftype", { buf = bufnr })
+
 	if buftype ~= "" then
 		return false
 	end
@@ -43,30 +55,21 @@ function source:is_available()
 	if store.has(bufnr) then
 		while current_node do
 			if lang == "html" or lang == "svelte" or lang == "vue" then
-				if current_node:type() == "attribute_name" then
-					local identifier_name = ts.get_node_text(current_node, 0)
+				if current_node:type() == "attribute" then
+					local attr_name_node = current_node:child(0)
 					if
-						identifier_name == "className"
-						or identifier_name == "class"
-						or identifier_name == "id"
-					then
-						current_selector = identifier_name
-						is_available = true
-					end
-					break
-				end
-				current_node = current_node:prev_named_sibling()
-			else
-				if current_node:type() == "jsx_attribute" then
-					if
-						current_node:child(0):type() == "property_identifier"
+						attr_name_node
+						and attr_name_node:type() == "attribute_name"
 					then
 						local identifier_name =
-							ts.get_node_text(current_node:child(0), 0)
+							ts.get_node_text(attr_name_node, 0)
 						if
-							identifier_name == "className"
-							or identifier_name == "class"
-							or identifier_name == "id"
+							identifier_name
+							and (
+								identifier_name == "className"
+								or identifier_name == "class"
+								or identifier_name == "id"
+							)
 						then
 							current_selector = identifier_name
 							is_available = true
@@ -75,6 +78,34 @@ function source:is_available()
 					end
 				end
 				current_node = current_node:parent()
+			else
+				-- JSX handling with nil checks
+				if current_node:type() == "jsx_attribute" then
+					local first_child = current_node:child(0)
+					if
+						first_child
+						and first_child:type() == "property_identifier"
+					then
+						local identifier_name = ts.get_node_text(first_child, 0)
+						if
+							identifier_name
+							and (
+								identifier_name == "className"
+								or identifier_name == "class"
+								or identifier_name == "id"
+							)
+						then
+							current_selector = identifier_name
+							is_available = true
+						end
+						break
+					end
+				end
+				current_node = current_node:parent()
+			end
+
+			if not current_node then
+				break
 			end
 		end
 	end
