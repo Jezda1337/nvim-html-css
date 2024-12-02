@@ -7,18 +7,14 @@ local cmp_config = require("cmp.config")
 local extractor = require("html-css.extractor")
 local ss = require("html-css.style_sheets")
 local internal = require("html-css.internal")
+local config = require("html-css.config").config
 
 local source_name = "html-css"
----@type Config
-local config = cmp_config.get_source_config(source_name).option or {}
----@type string[]
-local enable_on = config.enable_on or { "html" } -- html is enabled by default
-local style_sheets = config.style_sheets or {}
 
 ---@type string[]
 local enable_on_dto = {}
 
-for _, ext in pairs(enable_on) do
+for _, ext in pairs(config.enable_on) do
 	table.insert(enable_on_dto, "*." .. ext)
 end
 
@@ -29,7 +25,7 @@ function M:setup()
 	if #config.style_sheets ~= 0 then
 		vim.api.nvim_create_autocmd({ "VimEnter" }, {
 			callback = function(event)
-				ss.init(style_sheets, event.buf)
+				ss.init(config.style_sheets, event.buf)
 			end,
 		})
 	end
@@ -50,7 +46,7 @@ function M:setup()
 					"svelte",
 				},
 				callback = function()
-					local entry_file = config.spa.entry_file or "index.html"
+					local entry_file = config.spa.entry_file
 					spa.init(entry_file)
 				end,
 			}
