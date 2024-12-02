@@ -21,7 +21,7 @@ local source_name = "html-css"
 
 ---@type Config
 local user_config = cmp_config.get_source_config(source_name).option or {}
-config.setup(user_config) -- override default config with the user_config
+config = config.setup(user_config) -- override default config with the user_config
 
 function source:complete(_, callback)
 	callback({ items = self.items, isComplete = false })
@@ -48,9 +48,9 @@ function source:is_available()
 
 	local is_available = false
 
-	if config.spa.enable then
-		bufnr = 0
-	end
+  if config.spa.enable then
+    bufnr = 0
+  end
 
 	if store.has(bufnr) then
 		while current_node do
