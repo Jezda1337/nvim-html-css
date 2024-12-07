@@ -6,17 +6,15 @@ local fetcher = require("html-css.fetcher")
 
 ---@type fun(ctx: Ctx, cdn: string, bufnr: number)
 local function extractDataFromLinks(ctx, cdn, bufnr)
-	local selectors = store.get(bufnr, "selectors")
-		or {
-			ids = {},
-			classes = {},
-		}
+	local selectors = store.get(bufnr, "selectors") or {
+		ids = {},
+		classes = {},
+	}
 
 	if ctx.code == 0 then
 		local extracted_selectors = extractor.selectors(ctx.stdout, cdn)
-		selectors.classes =
-			vim.list_extend(selectors.classes, extracted_selectors.classes)
 		selectors.ids = vim.list_extend(selectors.ids, extracted_selectors.ids)
+		selectors.classes = vim.list_extend(selectors.classes, extracted_selectors.classes)
 
 		store.set(bufnr, "selectors", selectors)
 	end
