@@ -7,8 +7,7 @@ local store = require("html-css.store")
 
 ---@type fun(provider: string): string | nil
 local function provider_name(href_value)
-	local filename = href_value:match("[^/]+%.css$")
-		or href_value:match("[^/]+%.min%.css$")
+	local filename = href_value:match("[^/]+%.css$") or href_value:match("[^/]+%.min%.css$")
 	if filename then
 		filename = filename:gsub("%.min%.css$", "")
 		filename = filename:gsub("%.css$", "")
@@ -86,10 +85,6 @@ M.selectors = function(data, source)
 		ids = {},
 		classes = {},
 	}
-	local unique_selectors = {
-		ids = {},
-		classes = {},
-	}
 
 	local parser = ts.get_string_parser(data, "css")
 	local parse = parser:parse()
@@ -103,30 +98,50 @@ M.selectors = function(data, source)
 				local name = ts.get_node_text(node, data)
 
 				if capture_name == "id_name" then
-					unique_selectors.ids[name] = true
+					local block_node
+					for match_id, match_nodes in pairs(match) do
+						if query.captures[match_id] == "id_block" then
+							block_node = match_nodes[1]
+							break
+						end
+					end
+
+					local block_text = ""
+					if block_node then
+						block_text = ts.get_node_text(block_node, data)
+					end
+
+					table.insert(selectors.ids, {
+						label = name,
+						block = block_text,
+						kind = cmp.lsp.CompletionItemKind.Enum,
+						source = source,
+						provider = provider_name(source),
+					})
 				elseif capture_name == "class_name" then
-					unique_selectors.classes[name] = true
+					local block_node
+					for match_id, match_nodes in pairs(match) do
+						if query.captures[match_id] == "class_block" then
+							block_node = match_nodes[1]
+							break
+						end
+					end
+
+					local block_text = ""
+					if block_node then
+						block_text = ts.get_node_text(block_node, data)
+					end
+
+					table.insert(selectors.classes, {
+						label = name,
+						block = block_text,
+						kind = cmp.lsp.CompletionItemKind.Enum,
+						source = source,
+						provider = provider_name(source),
+					})
 				end
 			end
 		end
-	end
-
-	for id_name in pairs(unique_selectors.ids) do
-		table.insert(selectors.ids, {
-			label = id_name,
-			kind = cmp.lsp.CompletionItemKind.Enum,
-			source = source,
-			provider = provider_name(source),
-		})
-	end
-
-	for class_name in pairs(unique_selectors.classes) do
-		table.insert(selectors.classes, {
-			label = class_name,
-			kind = cmp.lsp.CompletionItemKind.Enum,
-			source = source,
-			provider = provider_name(source),
-		})
 	end
 
 	return selectors
