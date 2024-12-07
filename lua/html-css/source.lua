@@ -48,21 +48,17 @@ function source:is_available()
 
 	local is_available = false
 
-  if config.spa.enable then
-    bufnr = 0
-  end
+	if config.spa.enable then
+		bufnr = 0
+	end
 
 	if store.has(bufnr) then
 		while current_node do
 			if lang == "html" or lang == "svelte" or lang == "vue" then
 				if current_node:type() == "attribute" then
 					local attr_name_node = current_node:child(0)
-					if
-						attr_name_node
-						and attr_name_node:type() == "attribute_name"
-					then
-						local identifier_name =
-							ts.get_node_text(attr_name_node, 0)
+					if attr_name_node and attr_name_node:type() == "attribute_name" then
+						local identifier_name = ts.get_node_text(attr_name_node, 0)
 						if
 							identifier_name
 							and (
@@ -82,10 +78,7 @@ function source:is_available()
 				-- JSX handling with nil checks
 				if current_node:type() == "jsx_attribute" then
 					local first_child = current_node:child(0)
-					if
-						first_child
-						and first_child:type() == "property_identifier"
-					then
+					if first_child and first_child:type() == "property_identifier" then
 						local identifier_name = ts.get_node_text(first_child, 0)
 						if
 							identifier_name
@@ -123,6 +116,26 @@ function source:is_available()
 		end
 	end
 	return true
+end
+
+function source:resolve(completion_item, callback)
+	completion_item.detail = nil
+	if completion_item.block ~= nil then
+		completion_item.documentation = {
+			kind = require("cmp").lsp.MarkupKind.Markdown,
+			value = ("```css\n.%s%s\n```"):format(
+				completion_item.label,
+				completion_item
+					.block
+					:gsub("%s*{%s*", " {\n  ") -- Space before { and newline with indent after
+					:gsub("%s*:%s*", ": ")
+					:gsub("%s*;%s*", ";\n  ") -- Newline and indent after each ;
+					:gsub("%s*}%s*", "\n}") -- Newline before }
+					:gsub("!", " !")
+			),
+		}
+	end
+	callback(completion_item)
 end
 
 return source
