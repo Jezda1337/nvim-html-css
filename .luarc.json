@@ -1,11 +1,24 @@
 {
+  "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
+  "runtime": {
+    "version": "LuaJIT"
+  },
   "diagnostics": {
-    "disable": ["unused-local"],
     "globals": ["vim"]
   },
   "workspace.library": [
     "${3rd}/luv/library",
-    "~/.local/share/nvim/lazy/luvit-meta/library"
+    "~/.local/share/nvim/lazy/luvit-meta/library",
+    "${3rd}/busted/library",
+    "${3rd}/luv/library",
+    "/usr/local/share/nvim/runtime/lua",
+    "/usr/local/share/nvim/runtime"
   ],
-  "hint.enable": true
+  "hint": {
+    "enable": true
+  },
+  "codeLens": {
+    "enable": true
+  },
+  "completion.enable": true
 }
