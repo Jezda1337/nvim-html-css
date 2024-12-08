@@ -23,11 +23,7 @@ function M:setup()
 
 	-- GLOBAL STYLING
 	if #config.style_sheets ~= 0 then
-		vim.api.nvim_create_autocmd({ "VimEnter" }, {
-			callback = function(event)
-				ss.init(config.style_sheets, event.buf)
-			end,
-		})
+		ss.init(config.style_sheets)
 	end
 
 	-- SPA
@@ -56,7 +52,7 @@ function M:setup()
 		vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre", "WinEnter" }, {
 			pattern = enable_on_dto,
 			callback = function(event)
-				local hrefs = extractor.href()
+				local hrefs = extractor.href(config.style_sheets)
 				externals.init(event.buf, hrefs)
 				internal.init(event.buf, event.file)
 			end,

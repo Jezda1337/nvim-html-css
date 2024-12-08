@@ -32,13 +32,22 @@ local function is_local(url)
 	return not is_link(url)
 end
 
----@type fun(): Externals
-M.href = function()
+---@type fun(global_srouces: [string]): Externals
+M.href = function(global_sources)
 	---@type Externals
 	local externals = {
 		cdn = {},
 		locals = {},
 	}
+
+	for i, source in ipairs(global_sources) do
+		table.insert(externals.cdn, {
+			url = source,
+			fetched = true,
+			available = true,
+			provider = provider_name(source),
+		})
+	end
 
 	local parser = ts.get_parser(0, "html")
 	local parse = parser:parse()
