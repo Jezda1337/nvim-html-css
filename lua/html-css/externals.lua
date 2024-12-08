@@ -16,19 +16,17 @@ end
 
 ---@type fun(ctx: Ctx, link: Link, bufnr: number)
 local extractDataFromLinks = function(ctx, link, bufnr)
-	local selectors = store.get(bufnr, "selectors")
-		or {
-			ids = {},
-			classes = {},
-		}
+	local selectors = store.get(bufnr, "selectors") or {
+		ids = {},
+		classes = {},
+	}
 
 	local global_stylings = store.get(1, "selectors")
 	selectors = vim.tbl_deep_extend("force", selectors, global_stylings)
 
 	if ctx.code == 0 then
 		local extracted_selectors = extractor.selectors(ctx.stdout, link.url)
-		selectors.classes =
-			vim.list_extend(selectors.classes, extracted_selectors.classes)
+		selectors.classes = vim.list_extend(selectors.classes, extracted_selectors.classes)
 		selectors.ids = vim.list_extend(selectors.ids, extracted_selectors.ids)
 
 		link.fetched = true
@@ -43,11 +41,10 @@ local function remove_missing_hrefs(bufnr, hrefs, externals)
 		cdn = {},
 		locals = {},
 	}
-	local selectors = store.get(bufnr, "selectors")
-		or {
-			ids = {},
-			classes = {},
-		}
+	local selectors = store.get(bufnr, "selectors") or {
+		ids = {},
+		classes = {},
+	}
 
 	for type, external in pairs(externals) do
 		for _, link in ipairs(external) do
@@ -74,11 +71,10 @@ M.init = function(bufnr, hrefs)
 	-- checks does we already  have this in store, and if we does
 	-- then it will skip fetching, if not then we will fetch
 	-- only new href that is added
-	local externals = store.get(bufnr, "externals")
-		or {
-			cdn = {},
-			locals = {},
-		}
+	local externals = store.get(bufnr, "externals") or {
+		cdn = {},
+		locals = {},
+	}
 
 	externals = remove_missing_hrefs(bufnr, hrefs, externals)
 
@@ -110,17 +106,12 @@ M.init = function(bufnr, hrefs)
 			print("Fetching:", file.path)
 			readFile(file.path, function(data)
 				local extracted_selectors = extractor.selectors(data, file.path)
-				local selectors = store.get(bufnr, "selectors")
-					or {
-						ids = {},
-						classes = {},
-					}
-				selectors.classes = vim.list_extend(
-					selectors.classes,
-					extracted_selectors.classes
-				)
-				selectors.ids =
-					vim.list_extend(selectors.ids, extracted_selectors.ids)
+				local selectors = store.get(bufnr, "selectors") or {
+					ids = {},
+					classes = {},
+				}
+				selectors.classes = vim.list_extend(selectors.classes, extracted_selectors.classes)
+				selectors.ids = vim.list_extend(selectors.ids, extracted_selectors.ids)
 
 				file.fetched = true
 				file.available = true
