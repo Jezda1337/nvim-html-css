@@ -123,7 +123,7 @@ function source:resolve(completion_item, callback)
 	if completion_item.block ~= nil then
 		completion_item.documentation = {
 			kind = require("cmp").lsp.MarkupKind.Markdown,
-			value = ("```css\n.%s%s\n```"):format(
+			value = ("```css\n%s%s\n```"):format(
 				completion_item.label,
 				completion_item
 					.block
