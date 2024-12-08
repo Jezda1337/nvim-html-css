@@ -21,7 +21,7 @@ local extractDataFromLinks = function(ctx, link, bufnr)
 		classes = {},
 	}
 
-	local global_stylings = store.get(1, "selectors")
+	local global_stylings = store.get(999, "selectors")
 	selectors = vim.tbl_deep_extend("force", selectors, global_stylings)
 
 	if ctx.code == 0 then

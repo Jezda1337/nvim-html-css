@@ -4,8 +4,9 @@ local store = require("html-css.store")
 local extractor = require("html-css.extractor")
 local fetcher = require("html-css.fetcher")
 
----@type fun(ctx: Ctx, cdn: string, bufnr: number)
-local function extractDataFromLinks(ctx, cdn, bufnr)
+---@type fun(ctx: Ctx, cdn: string)
+local function extractDataFromLinks(ctx, cdn)
+	local bufnr = 999
 	local selectors = store.get(bufnr, "selectors") or {
 		ids = {},
 		classes = {},
@@ -20,13 +21,13 @@ local function extractDataFromLinks(ctx, cdn, bufnr)
 	end
 end
 
----@type fun(styles: string[], bufnr: number)
-M.init = function(styles, bufnr)
+---@type fun(styles: string[])
+M.init = function(styles)
 	for _, style in pairs(styles) do
 		local opts = {}
 		fetcher(style, opts, function(ctx)
 			print("Fetching:", style)
-			extractDataFromLinks(ctx, style, bufnr)
+			extractDataFromLinks(ctx, style)
 		end)
 	end
 end
