@@ -3,7 +3,6 @@ local M = {}
 local source = require("html-css.source")
 local externals = require("html-css.externals")
 local spa = require("html-css.spa")
-local cmp_config = require("cmp.config")
 local extractor = require("html-css.extractor")
 local ss = require("html-css.style_sheets")
 local internal = require("html-css.internal")
@@ -19,7 +18,7 @@ for _, ext in pairs(config.enable_on) do
 end
 
 function M:setup()
-	require("cmp").register_source("html-css", source)
+	require("cmp").register_source(source_name, source)
 
 	-- GLOBAL STYLING
 	if #config.style_sheets ~= 0 then

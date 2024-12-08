@@ -3,7 +3,6 @@ local M = {}
 local ts = vim.treesitter
 local q = require("html-css.querys")
 local cmp = require("cmp")
-local store = require("html-css.store")
 
 ---@type fun(provider: string): string | nil
 local function provider_name(href_value)

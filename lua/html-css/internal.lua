@@ -1,7 +1,6 @@
 local M = {}
 
 local ts = vim.treesitter
-local ts_query = require("nvim-treesitter.query")
 local store = require("html-css.store")
 local query = require("html-css.querys").internal_selectors
 local cmp = require("cmp")
