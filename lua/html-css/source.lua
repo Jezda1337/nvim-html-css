@@ -107,12 +107,20 @@ function source:is_available()
 		return false
 	end
 
-	local selectors = store.get(bufnr, "selectors")
+	local buffer_selectors = store.get(bufnr, "selectors") or { classes = {}, ids = {} }
+	local global_selectors = store.get(999, "selectors") or { classes = {}, ids = {} }
+
+	-- Merge global and buffer selectors
+	local merged_selectors = {
+		classes = vim.list_extend(vim.deepcopy(global_selectors.classes), buffer_selectors.classes),
+		ids = vim.list_extend(vim.deepcopy(global_selectors.ids), buffer_selectors.ids),
+	}
+
 	if current_selector == "class" or current_selector == "className" then
-		self.items = selectors.classes
+		self.items = merged_selectors.classes
 	else
 		if current_selector == "id" then
-			self.items = selectors.ids
+			self.items = merged_selectors.ids
 		end
 	end
 	return true

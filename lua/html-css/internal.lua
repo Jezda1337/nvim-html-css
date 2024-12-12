@@ -12,9 +12,6 @@ M.init = function(bufnr, file_name)
 		ids = {},
 	}
 
-	local global_stylings = store.get(999, "selectors") or { classes = {}, ids = {} }
-	selectors = vim.tbl_deep_extend("force", selectors, global_stylings)
-
 	local seen_classes = {}
 	local seen_ids = {}
 
