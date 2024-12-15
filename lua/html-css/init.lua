@@ -171,6 +171,8 @@ function Source:is_available()
 		svelte = true,
 		vue = true,
 		astro = true,
+		php = true,
+		blade = true,
 	}
 
 	while current_node do
