@@ -60,6 +60,7 @@ Explanation and types for options.
 | Property     | Type  | Description                                                                                                         |
 | :----------- | :---: | :------------------------------------------------------------------------------------------------------------------ |
 | enable_on    | table | Table accepts strings, one string per extension in which the plugin will be available (HTML is enabled by default). |
+| notify       | bool  | Do you want to have notifications? (default is `true`)                                                              |
 | style_sheets | table | External CDN CSS styles such as Bootstrap or Bulma. The link must be valid. Can be minified or normal versions.     |
 
 ## 🤩 Pretty Menu Items
