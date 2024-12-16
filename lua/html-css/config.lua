@@ -4,6 +4,9 @@ M.default = {
 		"html",
 	},
 	notify = false,
+	documentation = {
+		auto_show = true,
+	},
 	style_sheets = {},
 }
 

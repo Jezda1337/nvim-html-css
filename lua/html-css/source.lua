@@ -120,6 +120,9 @@ function source:is_available()
 end
 
 function source:resolve(completion_item, callback)
+	if not config.documentation.auto_show then
+		return
+	end
 	completion_item.detail = nil
 	if completion_item.block ~= nil then
 		completion_item.documentation = {
