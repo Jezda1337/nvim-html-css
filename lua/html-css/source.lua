@@ -70,7 +70,6 @@ function source:is_available()
 		while current_node do
 			if utils.isLangEnabled(lang, config.enable_on) then
 				if current_node:type() == "attribute" then
-					print("---------------------------------")
 					local attr_name_node = current_node:child(0)
 					if attr_name_node and attr_name_node:type() == "attribute_name" then
 						local identifier_name = ts.get_node_text(attr_name_node, 0)
