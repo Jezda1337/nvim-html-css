@@ -4,6 +4,7 @@ local store = require("html-css.store")
 local extractor = require("html-css.extractor")
 local fetcher = require("html-css.fetcher")
 local utils = require("html-css.utils")
+local config = require("html-css.config")
 
 local function url_exists(url, list)
 	for _, link in ipairs(list) do
@@ -91,7 +92,6 @@ M.init = function(bufnr, hrefs)
 		if not link.fetched then
 			local opts = {}
 			fetcher(link.url, opts, function(ctx)
-				print("Fetching:", link.url)
 				extractDataFromLinks(ctx, link, bufnr)
 			end)
 		end
@@ -100,8 +100,13 @@ M.init = function(bufnr, hrefs)
 	-- looping over the locals and read files and store selectors
 	for _, file in pairs(externals.locals) do
 		if not file.fetched then
-			print("Fetching:", file.path)
 			utils.readFile(file.path, function(data)
+				if config.config.notify then
+					vim.schedule(function()
+						vim.notify("Fetching: " .. file.path, vim.log.levels.INFO)
+					end)
+				end
+
 				local extracted_selectors = extractor.selectors(data, file.path)
 				local selectors = store.get(bufnr, "selectors") or {
 					ids = {},

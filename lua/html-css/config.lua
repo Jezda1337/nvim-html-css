@@ -3,6 +3,7 @@ M.default = {
 	enable_on = {
 		"html",
 	},
+	notify = true,
 	style_sheets = {},
 }
 

@@ -26,7 +26,6 @@ M.init = function(styles)
 	for _, style in pairs(styles) do
 		local opts = {}
 		fetcher(style, opts, function(ctx)
-			print("Fetching:", style)
 			extractDataFromLinks(ctx, style)
 		end)
 	end
