@@ -103,7 +103,7 @@ M.init = function(bufnr, hrefs)
 			utils.readFile(file.path, function(data)
 				if config.config.notify then
 					vim.schedule(function()
-						vim.notify("Fetching: " .. file.path, vim.log.levels.INFO)
+						vim.notify(file.path, vim.log.levels.INFO, { title = "Fetching ..." })
 					end)
 				end
 

@@ -9,9 +9,9 @@ return function(url, opts, cb)
 			if config.config.notify then
 				vim.schedule(function()
 					if url == {} then
-						vim.notify("Fetching: " .. url.path, vim.log.levels.INFO)
+						vim.notify(url.path, vim.log.levels.INFO, { title = "Fetching ..." })
 					else
-						vim.notify("Fetching: " .. url, vim.log.levels.INFO)
+						vim.notify(url, vim.log.levels.INFO, { title = "Fetching ..." })
 					end
 				end)
 			end
