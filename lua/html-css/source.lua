@@ -48,10 +48,6 @@ function source:is_available()
 
 	local is_available = false
 
-	if config.spa.enable then
-		bufnr = 0
-	end
-
 	if store.has(bufnr) then
 		while current_node do
 			if lang == "html" or lang == "svelte" or lang == "vue" then

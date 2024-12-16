@@ -4,10 +4,6 @@ M.default = {
 		"html",
 	},
 	style_sheets = {},
-	spa = {
-		enable = false,
-		entry_file = "index.html",
-	},
 }
 
 M.config = {}

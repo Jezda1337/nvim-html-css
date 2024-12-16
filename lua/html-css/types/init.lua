@@ -42,9 +42,4 @@
 
 ---@class Config
 ---@field enable_on string[]
----@field spa Spa
 ---@field style_sheets string[]
-
----@class Spa
----@field enable boolean
----@field entry_file string
