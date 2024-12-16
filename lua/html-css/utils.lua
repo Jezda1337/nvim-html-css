@@ -1,8 +1,7 @@
-local M = {}
+local utils = {}
 
-local uv = vim.loop
-
-M.readFile = function(path, cb)
+utils.readFile = function(path, cb)
+	local uv = vim.loop
 	uv.fs_open(path, "r", 438, function(err, fd)
 		assert(not err, err)
 		uv.fs_fstat(fd, function(err, stat)
@@ -18,4 +17,13 @@ M.readFile = function(path, cb)
 	end)
 end
 
-return M
+utils.isLangEnabled = function(lang, langs)
+	for _, v in ipairs(langs) do
+		if v == lang then
+			return true
+		end
+	end
+	return false
+end
+
+return utils

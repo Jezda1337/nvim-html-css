@@ -3,7 +3,7 @@ local M = {}
 local store = require("html-css.store")
 local extractor = require("html-css.extractor")
 local fetcher = require("html-css.fetcher")
-local readFile = require("html-css.helpers").readFile
+local utils = require("html-css.utils")
 
 local function url_exists(url, list)
 	for _, link in ipairs(list) do
@@ -101,7 +101,7 @@ M.init = function(bufnr, hrefs)
 	for _, file in pairs(externals.locals) do
 		if not file.fetched then
 			print("Fetching:", file.path)
-			readFile(file.path, function(data)
+			utils.readFile(file.path, function(data)
 				local extracted_selectors = extractor.selectors(data, file.path)
 				local selectors = store.get(bufnr, "selectors") or {
 					ids = {},
