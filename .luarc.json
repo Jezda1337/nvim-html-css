@@ -1,16 +1,24 @@
 {
-  "diagnostics": {
-    "disable": [
-            "unused-local"
-        ],
-    "globals": [
-      "vim"
-    ]
+  "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
+  "runtime": {
+    "version": "LuaJIT"
   },
-    "workspace.library": [
-        "/Users/radojejezdic/.local/share/nvim/lazy/neodev.nvim/types/nightly",
-        "/opt/homebrew/Cellar/neovim/HEAD-7c66120/share/nvim/runtime/lua",
-        "/Users/radojejezdic/Desktop/github/nvim-html-css/lua",
-        "${3rd}/luv/library"
-    ]
+  "diagnostics": {
+    "globals": ["vim"]
+  },
+  "workspace.library": [
+    "${3rd}/luv/library",
+    "~/.local/share/nvim/lazy/luvit-meta/library",
+    "${3rd}/busted/library",
+    "${3rd}/luv/library",
+    "/usr/local/share/nvim/runtime/lua",
+    "/usr/local/share/nvim/runtime"
+  ],
+  "hint": {
+    "enable": true
+  },
+  "codeLens": {
+    "enable": true
+  },
+  "completion.enable": true
 }

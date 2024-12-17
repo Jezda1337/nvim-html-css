@@ -1,115 +1,84 @@
 # ☕ Neovim HTML, CSS Support
 
-## 🚧 plugin is in dev mod 🚧
+> [!WARNING]
+> This plugin is under construction.
 
 Neovim CSS Intellisense for HTML
 
-#### HTML `id` and `class` attribute completion for Neovim.
+#### HTML id and class attribute completion for Neovim written in Lua.
 
 <br />
 
-![image](https://github.com/Jezda1337/nvim-html-css/assets/42359294/76205c6f-7ab4-42d9-a2e0-6e9120549279)
+![image](https://github.com/user-attachments/assets/c2e49c08-ca03-42f4-a973-6330ae211da3)
 
 ## ✨ Features
 
 - HTML `id` and `class` attribute completion.
-- Supports `linked` and `embedded` style sheets.
-- Supports additional `style sheets`.
-
-## ⚡ Required dependencies
-
-- [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
-- [sharkdp/fd](https://github.com/sharkdp/fd) (finder)
+- Supports linked and `internal` style sheets.
+- Supports additional `external` style sheets.
 
 ## 📦 Installation
 
-##### ⚠️ Currently, the plugin only works in projects that contain a .git folder, in case your project is not initialized using git, you can create a .git folder to use the plugin, this is only temporary.
-
-##### ⚠️ In case your tree-sitter is lazy loaded, you must also lazy load the html-css plugin in the same way as the tree-sitter. Another way is to add dependencies as in the example below.
-
-##### ⚠️ Plugin must be initialized after `nvim-cmp`.
-
-##### ⚠️ `option` table cannot be empty.
-
-## Lazy
+### Lazy
 
 ```lua
 return require("lazy").setup({
     {
         "hrsh7th/nvim-cmp",
+        dependencies = {
+            "Jezda1337/nvim-html-css" -- add it as dependencies of `nvim-cmp` or standalone plugin
+        },
         opts = {
             sources = {
-                -- other sources
                 {
                     name = "html-css",
                     option = {
-                        -- your configuration here
+                        enable_on = { "html" }, -- html is enabled by default
+                        notify = false,
+                        documentation = {
+                            auto_show = true, -- show documentation on select
+                        },
+                        -- add any external scss like one below
+                        style_sheets = {
+                            "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css",
+                            "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css",
+                        },
                     },
                 },
             },
         },
     },
-    { "Jezda1337/nvim-html-css",
-        dependencies = {
-            "nvim-treesitter/nvim-treesitter",
-            "nvim-lua/plenary.nvim"
-        },
-        config = function()
-            require("html-css"):setup()
-        end
-    }
 })
 ```
 
-## ⚙ Configuration
+## ⚙ Default Configuration
 
 ```lua
 option = {
-    enable_on = {
-        "html"
-        ...
-    }, -- set the file types you want the plugin to work on
-    dir_to_exclude = { "node_modules" },
-    file_extensions = { "css", "sass", "less" }, -- set the local filetypes from which you want to derive classes
-    style_sheets = {
-        -- example of remote styles, only css no js for now
-        "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css",
-        "https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css",
-    }
+    enable_on = { "html" },
+    notify = false,
+    documentation = {
+        auto_show = true,
+    },
+    style_sheets = {}
 }
 ```
 
-#### 🔌 Option spec
-
-explanation and types for options.
-
-| Property        | Type  | Description                                                                                                     |
-| :-------------- | :---: | :-------------------------------------------------------------------------------------------------------------- |
-| enable_on       | table | Table accepts strings, one string one extension in which the plugin will be available                           |
-| dir_to_exclude  | table | Table accepts strings of directory names to exclude from scanning. Default: ["node_modules"]                    |
-| file_extensions | table | Table accepts strings, extensions that you enter, classes that will be available to you will be read from them. |
-| style_sheets    | table | External cdn css styles such as bootstrap or bulma. The link must be valid. Can be minified version or normal.  |
-
 ## 🤩 Pretty Menu Items
 
-Setting the formatter this way you will get the file name with an extension in
-your cmp menu, so you know from which file that class coming.
+Setting the formatter this way, you will get the file name with an extension in your cmp menu, so you know from which file that class is coming.
 
 ```lua
 require("cmp").setup({
-    sources = {
-        {
-            name = "html-css"
-        },
-    },
+    -- ...
     formatting = {
         format = function(entry, vim_item)
-            if entry.source.name == "html-css" then
-                vim_item.menu = entry.completion_item.menu
+            if source == "html-css" then
+                source_mapping["html-css"] = "[" .. entry.completion_item.provider .. "]" or "[html-css]"
             end
             return vim_item
         end
     }
-
+    -- ...
 })
 ```
