@@ -1,12 +1,15 @@
 # ☕ Neovim HTML, CSS Support
 
+> [!WARNING]
+> This plugin is under construction.
+
 Neovim CSS Intellisense for HTML
 
 #### HTML id and class attribute completion for Neovim written in Lua.
 
 <br />
 
-![image](https://github.com/Jezda1337/nvim-html-css/assets/42359294/76205c6f-7ab4-42d9-a2e0-6e9120549279)
+![image](https://github.com/user-attachments/assets/c2e49c08-ca03-42f4-a973-6330ae211da3)
 
 ## ✨ Features
 
