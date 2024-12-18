@@ -17,6 +17,11 @@ Neovim CSS Intellisense for HTML
 - Supports linked and `internal` style sheets.
 - Supports additional `external` style sheets.
 
+## ⚡️ Requirements
+
+- Neovim 0.10+
+- curl 8.7+
+
 ## 📦 Installation
 
 ### Lazy
