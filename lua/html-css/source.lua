@@ -11,7 +11,6 @@ local source = {
 	items = {},
 }
 
-local parsers = require("nvim-treesitter.parsers")
 local ts = vim.treesitter
 local cmp_config = require("cmp.config")
 local config = require("html-css.config")
@@ -34,33 +33,23 @@ function source:is_available()
 	if buftype ~= "" then
 		return false
 	end
-	-- testing is needed with the large file.
-	-- could be performance issue
-	vim.treesitter.get_parser(0):parse()
+
 	local current_node = ts.get_node({ bufnr = 0, lang = "html" })
 	if not current_node then
 		return false
 	end
 
 	local current_selector = nil
-	local parser = parsers.get_parser(bufnr)
-	local lang = parser:lang()
 
-	-- just to avoid conflicts
-	if lang == "javascript" then
-		lang = "jsx"
-	end
-	-- erb is template language for Ruby
-	if lang == "embedded_template" then
-		lang = "erb"
-	end
+	-- grab the file extension
+	local ext = vim.fn.expand("%:t:e")
 
 	-- prevent autocompletion for .js file
 	if vim.fn.expand("%:t:e") == "js" then
 		return false
 	end
 
-	if not utils.isLangEnabled(lang, config.enable_on) then
+	if not utils.isLangEnabled(ext, config.enable_on) then
 		return false
 	end
 
@@ -68,7 +57,7 @@ function source:is_available()
 
 	if store.has(bufnr) then
 		while current_node do
-			if utils.isLangEnabled(lang, config.enable_on) then
+			if utils.isLangEnabled(ext, config.enable_on) then
 				if current_node:type() == "attribute" then
 					local attr_name_node = current_node:child(0)
 					if attr_name_node and attr_name_node:type() == "attribute_name" then
