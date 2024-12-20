@@ -14,22 +14,6 @@ M.general_link_href = [[
 		  ((attribute_value) @href_value (#match? @href_value "\\.css$|\\.less$|\\.scss$|\\.sass$")))))
 ]]
 
--- this query works for tsx and jsx
-M.jsx_link_href = [[
-	((identifier) @link (#eq? @link "link")
-		(jsx_attribute
-			(property_identifier) @href (#eq? @href "href")
-			(string
-				(string_fragment) @href_val)))
-]]
-
--- M.selectors = [[
--- 	(id_selector
--- 		(id_name) @id_name)
--- 	(class_selector
--- 		(class_name) @class_name)
--- ]]
-
 M.selectors = [[
 (
  (rule_set
