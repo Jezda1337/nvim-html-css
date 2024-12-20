@@ -12,14 +12,16 @@ local source_name = "html-css"
 ---@type string[]
 local enable_on_dto = {}
 
-for _, ext in pairs(config.enable_on) do
-	table.insert(enable_on_dto, "*." .. ext)
+if config.enable_on ~= nil then
+  for _, ext in pairs(config.enable_on) do
+    table.insert(enable_on_dto, "*." .. ext)
+  end
 end
 
 function M:setup()
 	require("cmp").register_source(source_name, source)
 
-	if #config.style_sheets ~= 0 then
+	if config.style_sheets ~= nil and #config.style_sheets ~= 0 then
 		ss.init(config.style_sheets)
 	end
 

@@ -18,6 +18,7 @@ utils.readFile = function(path, cb)
 end
 
 utils.isLangEnabled = function(lang, langs)
+  langs = langs or {}
 	for _, v in ipairs(langs) do
 		if v == lang then
 			return true

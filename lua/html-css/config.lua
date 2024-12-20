@@ -12,11 +12,14 @@ M.default = {
 
 M.config = {}
 
----@param opts Config
----@return Config
+---@param opts table|nil Configuration options provided by the user
+---@return table Final merged configuration
 M.setup = function(opts)
-	M.config = vim.tbl_deep_extend("force", M.default, opts)
-	return M.config
+    opts = opts or {}
+
+    M.config = vim.tbl_deep_extend("force", M.default, opts)
+
+    return M.config
 end
 
 return M

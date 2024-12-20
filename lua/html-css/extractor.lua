@@ -33,6 +33,8 @@ end
 
 ---@type fun(global_srouces: [string]): Externals
 M.href = function(global_sources)
+  global_sources = global_sources or {}
+
 	---@type Externals
 	local externals = {
 		cdn = {},

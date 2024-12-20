@@ -18,9 +18,11 @@ local utils = require("html-css.utils")
 
 local source_name = "html-css"
 
----@type Config
-local user_config = cmp_config.get_source_config(source_name).option or {}
-config = config.setup(user_config) -- override default config with the user_config
+if cmp_config.get_source_config(source_name) ~= nil then
+  ---@type Config
+  local user_config = cmp_config.get_source_config(source_name).option or {}
+  config = config.setup(user_config) -- override default config with the user_config
+end
 
 function source:complete(_, callback)
 	callback({ items = self.items, isComplete = false })
@@ -48,6 +50,9 @@ function source:is_available()
 	if vim.fn.expand("%:t:e") == "js" then
 		return false
 	end
+
+  print(ext)
+  print(vim.inspect(config.enable_on))
 
 	if not utils.isLangEnabled(ext, config.enable_on) then
 		return false
@@ -82,7 +87,7 @@ function source:is_available()
 				end
 			end
 		end
-
+    
 		-- prevent autocompletion to be called everywhere
 		if not is_available then
 			return false
