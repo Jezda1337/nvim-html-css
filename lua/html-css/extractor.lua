@@ -33,7 +33,7 @@ end
 
 ---@type fun(global_srouces: [string]): Externals
 M.href = function(global_sources)
-  global_sources = global_sources or {}
+	global_sources = global_sources or {}
 
 	---@type Externals
 	local externals = {
@@ -60,8 +60,7 @@ M.href = function(global_sources)
 	-- This means that the returned table maps capture IDs to a list of nodes that need to be iterated over.
 	-- For backwards compatibility, an option all=false (only return the last matching node) is provided that will be removed in a future release.
 	for _, match, _ in qp:iter_matches(root, 0, 0, -1, { all = true }) do
-		for id, nodes in pairs(match) do
-			-- local name = qp.captures[id]
+		for _, nodes in pairs(match) do
 			for _, node in ipairs(nodes) do
 				if node:type() == "attribute_value" then
 					local href_value = ts.get_node_text(node, 0)
@@ -78,6 +77,7 @@ M.href = function(global_sources)
 							fetched = false,
 							available = false,
 							file_name = file_name(href_value),
+							full_path = "",
 						})
 					end
 				end
