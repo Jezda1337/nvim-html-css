@@ -78,8 +78,9 @@ require("cmp").setup({
     -- ...
     formatting = {
         format = function(entry, vim_item)
+            local source = entry.source.name
             if source == "html-css" then
-                source_mapping["html-css"] = "[" .. entry.completion_item.provider .. "]" or "[html-css]"
+                vim_item.menu = "[" .. entry.completion_item.provider .. "]" or "[html-css]"
             end
             return vim_item
         end
