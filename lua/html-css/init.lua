@@ -12,21 +12,23 @@ local config = {
 }
 
 html_css.setup = function(opts)
-    config = vim.tbl_extend("force", opts, config)
+    config = vim.tbl_extend("force", config, opts)
+
+    vim.print(config)
 
     local enable_on_dto = {}
     for _, ext in pairs(config.enable_on) do
         table.insert(enable_on_dto, "*." .. ext)
     end
 
-    if #config.style_sheets ~= 0 then
-        require("html-css").setup(config.style_sheets)
-    end
+    -- if #config.style_sheets ~= 0 then
+    -- require("html-css").setup(config.style_sheets)
+    -- end
 
     vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre", "WinEnter" }, {
         pattern = enable_on_dto,
         callback = function(ctx)
-            require("html-css.collector").setup(ctx)
+            require("html-css.collector").setup(ctx, config)
         end,
     })
 

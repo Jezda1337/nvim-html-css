@@ -1,5 +1,5 @@
 local css = {}
 
-css.parser = function() end
+css.parse = function() end
 
 return css
