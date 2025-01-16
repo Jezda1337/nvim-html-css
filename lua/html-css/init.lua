@@ -1,4 +1,5 @@
 local html_css = {}
+local source = require("html-css.source")
 
 html_css.source_name = "html-css"
 
@@ -14,16 +15,10 @@ local config = {
 html_css.setup = function(opts)
     config = vim.tbl_extend("force", config, opts)
 
-    vim.print(config)
-
     local enable_on_dto = {}
     for _, ext in pairs(config.enable_on) do
         table.insert(enable_on_dto, "*." .. ext)
     end
-
-    -- if #config.style_sheets ~= 0 then
-    -- require("html-css").setup(config.style_sheets)
-    -- end
 
     vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre", "WinEnter" }, {
         pattern = enable_on_dto,
@@ -32,7 +27,11 @@ html_css.setup = function(opts)
         end,
     })
 
-    require("cmp").register_source(html_css.source_name, require("html-css.source"))
+    if source == nil then
+        print("Failed to load 'html-css.source'")
+        return
+    end
+    require("cmp").register_source(html_css.source_name, source:new(config.enable_on))
 end
 
 return html_css
