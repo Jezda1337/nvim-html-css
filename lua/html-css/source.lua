@@ -1,3 +1,4 @@
+local s = require("html-css.store")
 local u = require("html-css.util")
 local source = {
     items = {
@@ -38,10 +39,13 @@ function source:is_available()
         "className",
     }
 
+    local current_attr
     while current_node do
         if current_node:type() == "attribute" then
             if current_node:child(0):type() == "attribute_name" then
                 if u.contains(allow_attrs, ts.get_node_text(current_node:child(0), bufnr)) then
+                    current_attr = ts.get_node_text(current_node:child(0), bufnr)
+                    --self.items = s.get(bufnr, "selectors")[current_attr]
                     return true
                 end
             end

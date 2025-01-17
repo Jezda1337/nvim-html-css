@@ -10,8 +10,6 @@ html.lang = "html"
 html.parse = function(bufnr, style_sheets)
     local root, query = u.parse(html.lang, q.href, bufnr)
 
-    --vim.print(style_sheets)
-
     local externals = {
         cdn = {},
         locals = {},
