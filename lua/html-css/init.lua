@@ -24,14 +24,18 @@ html_css.setup = function(opts)
         table.insert(enable_on_dto, "*." .. ext)
     end
 
+    local store = require("html-css.store")
     vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre", "WinEnter" }, {
         pattern = enable_on_dto,
         callback = function(ctx)
-            require("html-css.store").set(ctx.buf, "full_path", ctx.file)
-            require("html-css.store").set(ctx.buf, "id", ctx.id)
+            store.set(ctx.buf, {
+                bufnr = ctx.buf,
+                id = ctx.id,
+                full_path = ctx.file,
+                name = vim.fn.expand("%:t:r"),
+            }, nil)
 
             require("html-css.collector").setup(ctx, config)
-            vim.print(require("html-css.store").get(ctx.buf))
         end,
     })
     require("cmp").register_source(html_css.source_name, require("html-css.source"):new(config.enable_on))

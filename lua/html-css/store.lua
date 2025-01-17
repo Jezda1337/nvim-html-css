@@ -1,11 +1,15 @@
 local store = {}
 
----@type fun(bufnr: number, key: string, value: any)
+---@type fun(bufnr: number, key: string | table, value: any)
 store.set = function(bufnr, key, value)
     if not store[bufnr] then
-        store[bufnr] = {
-            [key] = value,
-        }
+        store[bufnr] = {}
+    end
+    if type(key) == "table" and value == nil then
+        for k, v in pairs(key) do
+            store[bufnr][k] = v
+        end
+        return
     end
     store[bufnr][key] = value
 end
