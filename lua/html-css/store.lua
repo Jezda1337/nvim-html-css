@@ -1,39 +1,42 @@
 local store = {}
 
----@type fun(bufnr: number, key: string | table, value: any)
-store.set = function(bufnr, key, value)
-    if not store[bufnr] then
-        store[bufnr] = {}
-    end
-    if type(key) == "table" and value == nil then
-        for k, v in pairs(key) do
-            store[bufnr][k] = v
-        end
-        return
-    end
-    store[bufnr][key] = value
+---@type fun(self: metatable, bufnr: integer, key?: string, value?: integer | string | table)
+function store:set(bufnr, key, value)
+	if not store[bufnr] then store[bufnr] = { [key] = {} } end
+
+	if key == "selectors" and type(value) == "table" and next(value) ~= nil then
+		if not store[bufnr][key] then
+			store[bufnr][key] = {}
+		end
+
+		for type, items in pairs(value) do
+			if not store[bufnr][key][type] then
+				store[bufnr][key][type] = {}
+			end
+
+			for _, item in pairs(items) do
+				table.insert(store[bufnr][key][type], item)
+			end
+		end
+	else
+		store[bufnr][key] = value
+	end
 end
 
----@type fun(bufnr: number, key: string?):any
-store.get = function(bufnr, key)
-    if not store[bufnr] then
-        return nil
-    end
-    if not key then
-        return store[bufnr]
-    end
-    return store[bufnr][key]
+---@type fun(self: metatable, bufnr: integer, key?: string): any
+function store:get(bufnr, key)
+	if not key then
+		return store[bufnr]
+	end
+	return store[bufnr][key]
 end
 
----@type fun(bufnr: number, key: string?):boolean
-store.has = function(bufnr, key)
-    if not store[bufnr] then
-        return false
-    end
-    if not key then
-        return store[bufnr] ~= nil
-    end
-    return store[bufnr][key] ~= nil
+---@type fun(self: metatable, bufnr: integer, key?: string):boolean
+function store:has(bufnr, key)
+	if not key then
+		return store[bufnr] ~= nil
+	end
+	return store[bufnr][key] ~= nil
 end
 
 return store

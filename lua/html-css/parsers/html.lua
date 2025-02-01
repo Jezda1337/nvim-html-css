@@ -1,60 +1,39 @@
-local html = {}
-local u = require("html-css.parsers.util")
-local q = require("html-css.querys")
+local utils = require("html-css.parsers.utils")
 local ts = vim.treesitter
-local s = require("html-css.store")
+local html = {}
 
 html.lang = "html"
+html.query = [[
+((tag_name) @tag (#eq? @tag "link")
+	  (attribute
+		(attribute_name) @attr_name (#eq? @attr_name "href")
+		(quoted_attribute_value
+		  ((attribute_value) @href_value (#match? @href_value "\\.css$|\\.less$|\\.scss$|\\.sass$")))))
 
----@type fun(bufnr: integer, style_sheets: table<string>)
-html.parse = function(bufnr, style_sheets)
-    local root, query = u.parse(html.lang, q.href, bufnr)
+((raw_text)@rw)
+]]
 
-    local externals = {
-        cdn = {},
-        locals = {},
-    }
+---@type fun(bufnr: integer): { cdn: table, raw_text: string }
+html.setup = function(bufnr)
+	local root, query = utils.parse(html.lang, html.query, bufnr)
 
-    for _, source in ipairs(style_sheets) do
-        table.insert(externals.cdn, {
-            url = source,
-            fetched = true,
-            available = true,
-            provider = u.provider_name(source),
-        })
-    end
+	local data = { cdn = {}, raw_text = "" }
 
-    -- https://neovim.io/doc/user/treesitter.html#Query%3Aiter_matches()
-    -- Query:iter_matches() correctly returns all matching nodes in a match instead of only the last node.
-    -- This means that the returned table maps capture IDs to a list of nodes that need to be iterated over.
-    -- For backwards compatibility, an option all=false (only return the last matching node) is provided that will be removed in a future release.
-    for _, match, _ in query:iter_matches(root, 0, 0, -1, { all = true }) do
-        for _, nodes in pairs(match) do
-            for _, node in ipairs(nodes) do
-                if node:type() == "attribute_value" then
-                    local href_value = ts.get_node_text(node, 0)
-                    if u.is_link(href_value) then
-                        table.insert(externals.cdn, {
-                            url = href_value,
-                            fetched = false,
-                            available = false,
-                            provider = u.provider_name(href_value),
-                        })
-                    elseif u.is_local(href_value) then
-                        table.insert(externals.locals, {
-                            path = href_value,
-                            fetched = false,
-                            available = false,
-                            file_name = u.get_file_name(href_value),
-                            full_path = "",
-                        })
-                    end
-                end
-            end
-        end
-    end
+	for _, match, _ in query:iter_matches(root, bufnr, 0, -1, { all = true }) do
+		for id, nodes in pairs(match) do
+			local name = query.captures[id]
+			for _, node in ipairs(nodes) do
+				if name == "href_value" then
+					-- data.cdn = data.cdn .. ts.get_node_text(node, bufnr)
+					table.insert(data.cdn, ts.get_node_text(node, bufnr))
+				elseif name == "rw" then
+					data.raw_text = data.raw_text .. ts.get_node_text(node, bufnr)
+				end
+			end
+		end
+	end
 
-    s.set(bufnr, "externals", externals)
+	return data
 end
 
 return html
