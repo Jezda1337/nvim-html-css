@@ -18,7 +18,7 @@ html_css.setup = function(opts)
 	if config.style_sheets ~= nil and #config.style_sheets ~= 0 then
 		-- this bufnr represents global style_sheets
 		local bufnr = 999
-		require("html-css.fetcher").setup(bufnr, config.style_sheets)
+		require("html-css.fetcher").setup(bufnr, config.style_sheets, config.notify)
 	end
 
 	vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre", "WinEnter" }, {

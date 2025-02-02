@@ -3,7 +3,7 @@ local parsers = require("html-css.parsers")
 local store = require("html-css.store")
 local fetcher = {}
 
-fetcher.setup = function(bufnr, sources)
+fetcher.setup = function(bufnr, sources, notify)
 	local cdn = {}
 	local selectors = {}
 
@@ -24,7 +24,11 @@ fetcher.setup = function(bufnr, sources)
 						source = url,
 						fetched = true,
 					})
-					print("GET: " .. url)
+					if notify then
+						vim.schedule(function()
+							vim.notify("GET: " .. url)
+						end)
+					end
 				end
 			end)
 		end
