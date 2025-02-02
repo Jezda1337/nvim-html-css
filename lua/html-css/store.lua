@@ -25,7 +25,7 @@ end
 
 ---@type fun(self: metatable, bufnr: integer, key?: string): any
 function store:get(bufnr, key)
-	if not key then
+	if not store[key] then
 		return store[bufnr]
 	end
 	return store[bufnr][key]
