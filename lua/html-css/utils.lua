@@ -1,5 +1,23 @@
 local utils = {}
 
+---@type fun(path: string, cb: fun(stdout: string))
+utils.readFile = function(path, cb)
+	local uv = vim.loop
+	uv.fs_open(vim.fn.expand("%:p:h") .. "/" .. path, "r", 438, function(err, fd)
+		assert(not err, err)
+		uv.fs_fstat(fd, function(err, stat)
+			assert(not err, err)
+			uv.fs_read(fd, stat.size, 0, function(err, data)
+				assert(not err, err)
+				uv.fs_close(fd, function(err)
+					assert(not err, err)
+					return cb(data)
+				end)
+			end)
+		end)
+	end)
+end
+
 ---@type fun(file: string):string
 utils.get_file_name = function(file)
 	return vim.fn.fnamemodify(file, ":t:r")

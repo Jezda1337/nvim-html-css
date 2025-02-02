@@ -5,6 +5,7 @@ local fetcher = {}
 
 fetcher.setup = function(bufnr, sources)
 	local cdn = {}
+	local locals = {}
 	local selectors = {}
 
 	for _, url in pairs(sources) do
@@ -27,6 +28,21 @@ fetcher.setup = function(bufnr, sources)
 					print("GET: " .. url)
 				end
 			end)
+		elseif utils.is_local(url) then
+			utils.readFile(url, function(stdout)
+				local css_selectors = parsers.css.setup(stdout)
+
+				for type, data in pairs(css_selectors) do
+					if not selectors[type] then selectors[type] = {} end
+					for _, selector in pairs(data) do
+						table.insert(selectors[type], selector)
+					end
+				end
+			end)
+			table.insert(locals, {
+				source = url,
+				fetched = true,
+			})
 		end
 	end
 
