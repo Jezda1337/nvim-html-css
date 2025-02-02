@@ -46,7 +46,7 @@ function source:is_available()
 						class = vim.list_extend(vim.deepcopy(global_selectors.class), buffer_selectors.class),
 						id = vim.list_extend(vim.deepcopy(global_selectors.id), buffer_selectors.id),
 					}
-					print(current_attr)
+
 					self.items = merged_selectors[current_attr]
 					return true
 				end

@@ -1,7 +1,7 @@
 local config = {}
 
 config.default = {
-	enable_on = { "html" },
+	enable_on = { "html", "css" },
 	notify = false,
 	documentation = {
 		auto_show = false,

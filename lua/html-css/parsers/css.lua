@@ -26,16 +26,18 @@ css.query = [[
 
 ((stylesheet
    (import_statement
-	 (string_value) @value)))
+	 (string_value
+		(string_content) @value))))
 ((stylesheet
    (import_statement
 	 (call_expression
 	   (function_name)
 	   (arguments
-		 (string_value)@value)))))
+		 (string_value
+			(string_content)@value))))))
 ]]
 
----@type fun(stdout: string): { class: table<any>, id: table<any> }
+---@type fun(stdout: string): { class: table<any>, id: table<any>, imports: table<any> }
 css.setup = function(stdout)
 	local root, query = utils.string_parse(css.lang, css.query, stdout)
 
@@ -65,7 +67,7 @@ css.setup = function(stdout)
 				end
 				if name == "value" then
 					table.insert(selectors.imports, {
-						source
+						source = ts.get_node_text(node, stdout)
 					})
 				end
 			end

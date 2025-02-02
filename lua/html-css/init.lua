@@ -32,6 +32,7 @@ html_css.setup = function(opts)
 				-- extract selectors from external links in hrefs from a buffer
 				require("html-css.fetcher").setup(ctx.buf, html_data.cdn)
 
+				-- add local classes from buffer
 				store:set(ctx.buf, "selectors", local_selectors)
 			end)
 		end,
