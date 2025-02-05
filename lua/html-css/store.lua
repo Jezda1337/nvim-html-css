@@ -2,41 +2,30 @@ local store = {}
 
 ---@type fun(self: metatable, bufnr: integer, key?: string, value?: integer | string | table)
 function store:set(bufnr, key, value)
-	if not store[bufnr] then store[bufnr] = { [key] = {} } end
+	if not self[bufnr] then self[bufnr] = {} end
+	if not self[bufnr][key] then self[bufnr][key] = {} end
 
-	if key == "selectors" and type(value) == "table" and next(value) ~= nil then
-		if not store[bufnr][key] then
-			store[bufnr][key] = {}
-		end
-
-		for type, items in pairs(value) do
-			if not store[bufnr][key][type] then
-				store[bufnr][key][type] = {}
-			end
-
-			for _, item in pairs(items) do
-				table.insert(store[bufnr][key][type], item)
-			end
-		end
-	else
-		store[bufnr][key] = value
+	if next(self[bufnr][key]) and type(value) == "table" then
+		self[bufnr][key] = vim.list_extend(vim.deepcopy(self[bufnr][key]), value)
+		return
 	end
+
+	self[bufnr][key] = value
 end
 
 ---@type fun(self: metatable, bufnr: integer, key?: string): any
 function store:get(bufnr, key)
-	if not store[bufnr][key] then
-		return store[bufnr]
-	end
-	return store[bufnr][key]
+	if not self[bufnr] then return nil end
+	if not self[bufnr][key] then return self[bufnr] end
+	return self[bufnr][key]
 end
 
 ---@type fun(self: metatable, bufnr: integer, key?: string):boolean
 function store:has(bufnr, key)
 	if not key then
-		return store[bufnr] ~= nil
+		return self[bufnr] ~= nil
 	end
-	return store[bufnr][key] ~= nil
+	return self[bufnr][key] ~= nil
 end
 
 return store
