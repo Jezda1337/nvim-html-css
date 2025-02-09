@@ -1,12 +1,10 @@
 local config = {}
 
-config.default = {
-	enable_on = { "html", "css" },
-	notify = false,
-	documentation = {
-		auto_show = false,
-	},
-	style_sheets = {},
+config.enable_on = {"html", "css"}
+config.documentation = {
+	auto_show = true,
 }
+config.style_sheets = {}
+config.notify = true
 
 return config

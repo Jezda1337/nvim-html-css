@@ -1,45 +1,38 @@
 local html_css = {}
-local config = require("html-css.config")
 local store = require("html-css.store")
+local defaults = require("html-css.config")
 
-html_css.setup = function(opts)
-	config = vim.tbl_extend("force", config.default, opts)
-	local enable_on_dto = {}
+html_css.setup = function (opts)
+	opts = vim.tbl_extend("force", defaults, opts)
 
 	if vim.fn.has("nvim-0.10") == 0 then
 		vim.notify("nvim-html-css requires nvim 0.10 and newer", vim.log.levels.ERROR, { title = "nvim-html-css" })
 		return
 	end
 
-	for _, ext in pairs(config.enable_on) do
-		table.insert(enable_on_dto, "*." .. ext)
+
+	if next(opts.style_sheets) then
+		require("html-css.fetcher").setup(999, opts.style_sheets, opts.notify)
 	end
 
-	if config.style_sheets ~= nil and #config.style_sheets ~= 0 then
-		-- this bufnr represents global style_sheets
-		local bufnr = 999
-		require("html-css.fetcher").setup(bufnr, config.style_sheets, config.notify)
-	end
-
+	local group = vim.api.nvim_create_augroup("html-css", { clear = true })
 	vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre", "WinEnter" }, {
-		pattern = enable_on_dto,
-		callback = function(ctx)
-			vim.schedule(function()
-				-- current html data like hrefs and raw_text
-				local html_data = require("html-css.parsers").html.setup(ctx.buf)
-				-- extract classes and ids + stulyes from raw_text
-				local local_selectors = require("html-css.parsers").css.setup(html_data.raw_text)
-				-- extract selectors from external links in hrefs from a buffer
-				require("html-css.fetcher").setup(ctx.buf, html_data.cdn)
+		group = group,
+		pattern = vim.tbl_map(function (ext) return "*." .. ext end, opts.enable_on),
+		callback = function (ctx)
 
-				-- add local classes from buffer
-				store:set(ctx.buf, "selectors", local_selectors)
-			end)
-		end,
+		end
 	})
 
-
-	require("cmp").register_source("html-css", require("html-css.source"):new(config))
+	vim.api.nvim_create_autocmd("BufDelete", {
+		group = group,
+		pattern = "*",
+		callback = function (ctx)
+			store:clear(ctx.buf)
+		end
+	})
+	require("cmp").register_source("html-css", require("html-css.source"):new(opts))
 end
+
 
 return html_css

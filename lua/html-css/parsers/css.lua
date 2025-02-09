@@ -37,14 +37,14 @@ css.query = [[
 			(string_content)@value))))))
 ]]
 
----@type fun(stdout: string): { class: table<any>, id: table<any>, imports: table<any> }
+---@param stdout string
+---@return table<any>
 css.setup = function(stdout)
 	local root, query = utils.string_parse(css.lang, css.query, stdout)
-
-	local selectors = {
+	local css_data = {
+		imports = {},
 		class = {},
 		id = {},
-		imports = {}
 	}
 
 	for _, match, _ in query:iter_matches(root, stdout, 0, -1, { all = true }) do
@@ -52,29 +52,30 @@ css.setup = function(stdout)
 			local name = query.captures[id]
 			for _, node in ipairs(nodes) do
 				if name == "class_name" then
-					table.insert(selectors.class, {
+					table.insert(css_data.class, {
 						label = ts.get_node_text(node, stdout),
 						block = ts.get_node_text(match[3][1], stdout),
 						kind = 13,
 					})
 				end
 				if name == "id_name" then
-					table.insert(selectors.id, {
+					table.insert(css_data.id, {
 						label = ts.get_node_text(node, stdout),
 						block = ts.get_node_text(match[6][1], stdout),
 						kind = 13,
 					})
 				end
 				if name == "value" then
-					table.insert(selectors.imports, {
-						source = ts.get_node_text(node, stdout)
-					})
+					table.insert(css_data.imports, ts.get_node_text(node, stdout))
+					-- table.insert(css_data.imports, {
+					-- 	source = ts.get_node_text(node, stdout)
+					-- })
 				end
 			end
 		end
 	end
 
-	return selectors
+	return css_data
 end
 
 return css

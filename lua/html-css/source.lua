@@ -17,15 +17,11 @@ end
 function source:is_available()
 	local ts = vim.treesitter
 	local bufnr = vim.api.nvim_get_current_buf()
-	local global_selectors = store:get(999, "selectors")
+	local global_selectors = store:get(999, "selectors") or {}
 
 	if utils.is_special_buffer() then
 		return false
 	end
-
-	-- if not utils.is_lang_enabled(self.enable_on) then
-	-- 	return false
-	-- end
 
 	local current_node = ts.get_node({ bufnr = bufnr, lang = "html" })
 
@@ -41,10 +37,10 @@ function source:is_available()
 			if current_node:child(0):type() == "attribute_name" then
 				if utils.contains(allow_attrs, ts.get_node_text(current_node:child(0), bufnr)) then
 					current_attr = ts.get_node_text(current_node:child(0), bufnr)
-					local buffer_selectors = store:get(bufnr, "selectors")
+					local buffer_selectors = store:get(bufnr, "selectors") or {}
 					local merged_selectors = {
-						class = vim.list_extend(vim.deepcopy(global_selectors.class), buffer_selectors.class),
-						id = vim.list_extend(vim.deepcopy(global_selectors.id), buffer_selectors.id),
+						class = vim.list_extend(vim.deepcopy(global_selectors.class or {}), buffer_selectors.class or {}),
+						id = vim.list_extend(vim.deepcopy(global_selectors.id or {}), buffer_selectors.id or {}),
 					}
 
 					self.items = merged_selectors[current_attr]
