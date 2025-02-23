@@ -15,48 +15,25 @@ html_css.setup = function(opts)
 		callback = function(args)
 			if utils.is_special_buffer(args.buf) then return end
 
-			local previous_sources = cache:get_buffer_sources(args.buf)
-
 			local html_data = require("html-css.parsers.html").setup(args.buf)
 			local sources = vim.list_extend(opts.style_sheets, html_data.cdn)
 
-			-- Process inline styles as a single CSS block
 			if #html_data.raw_text > 0 then
-				cache:update_inline_styles(args.buf, html_data.raw_text)
-				table.insert(sources, "buffer://" .. args.buf .. "/inline-styles")
-			end
-
-			for _, src in pairs(sources) do
-				fetcher:fetch(src, args.buf, opts.notify)
-			end
 				local inline_source = "buffer://" .. args.buf .. "/inline-styles"
 				local data = require("html-css.parsers.css").setup(html_data.raw_text)
 
-			cache:link_buffer(args.buf, sources)
 				cache:update(inline_source, data)
 
-			for _, src in ipairs(sources) do
-				if not utils.is_remote(src) or cache._sources[utils.resolve_path(src)] then
 				for _, src in pairs(data.imports) do
 					fetcher:fetch(src, args.buf, opts.notify)
 					table.insert(sources, src)
 				end
-			end
 
-			local current_sources = cache:get_buffer_sources(args.buf)
-			for src in pairs(current_sources) do
-				if not previous_sources[src] or cache:needs_refresh(src) then
-					fetcher:fetch(src, args.buf, opts.notify)
-				end
 				table.insert(sources, inline_source)
 			end
 
-			-- Cleanup old watchers for removed sources
-			for src in pairs(previous_sources) do
-				if not current_sources[src] then
-					cache:_unwatch_source(src)
-				end
 			cache:link_buffer(args.buf, sources)
+
 			for _, src in pairs(sources) do
 				fetcher:fetch(src, args.buf, opts.notify)
 			end
