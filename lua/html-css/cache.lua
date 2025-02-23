@@ -186,6 +186,25 @@ function cache:_get_classes(bufnr)
 end
 
 ---@param bufnr integer
+function cache:_get_ids(bufnr)
+	local buffer_sources = self._buffers[bufnr].sources or {}
+	local ids = {}
+
+	for source, _ in pairs(buffer_sources) do
+		local source_data = self._sources[source]
+		if source_data then
+			for _, id in pairs(source_data.ids) do
+				id.source_name = source_data.meta.name
+				id.source_path = source_data.meta.path
+				table.insert(ids, id)
+			end
+		end
+	end
+
+	return ids
+end
+
+---@param bufnr integer
 ---@param css_content string
 function cache:update_inline_styles(bufnr, css_content)
 	local inline_source = "buffer://" .. bufnr .. "/inline-styles"
