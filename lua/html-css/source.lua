@@ -1,5 +1,6 @@
 local ok, cmp = pcall(require, "cmp")
 local cache   = require("html-css.cache")
+local utils = require "html-css.utils"
 if not ok then return end
 
 local source = {}
@@ -9,6 +10,8 @@ function source:get_trigger_character()
 end
 
 function source:is_available()
+	if utils.is_special_buffer(vim.api.nvim_get_current_buf()) then return false end
+
 	local node = vim.treesitter.get_node()
 	self.context = nil
 
