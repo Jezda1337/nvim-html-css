@@ -45,7 +45,7 @@ end
 function fetcher:_process_imports(imports, bufnr, notify)
 	local sources = {}
 	for _, imp in ipairs(imports) do
-		local resolved = utils.resolve_import(imp, bufnr)
+		local resolved = utils.resolve_path(imp)
 		if resolved then
 			table.insert(sources, resolved)
 			self:fetch(resolved, bufnr, notify)

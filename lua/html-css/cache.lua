@@ -55,8 +55,13 @@ function cache:link_buffer(bufnr, sources)
 		end
 	end
 
+	local current_sources = self._buffers[bufnr] and self._buffers[bufnr].sources or {}
+	for resolved in pairs(resolved_sources) do
+		current_sources[resolved] = true
+	end
+
 	self._buffers[bufnr] = {
-		sources = resolved_sources,
+		sources = current_sources,
 		version = self.version
 	}
 	self._version = self._version + 1

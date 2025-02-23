@@ -9,7 +9,7 @@ local html_css = {}
 html_css.setup = function(opts)
 	opts = vim.tbl_extend("force", config, opts)
 
-	vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre" }, {
+	vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre", "BufEnter" }, {
 		group = vim.api.nvim_create_augroup("html-css", {}),
 		pattern = vim.tbl_map(function(ext) return "*." .. ext end, opts.enable_on),
 		callback = function(args)
@@ -18,25 +18,26 @@ html_css.setup = function(opts)
 			local html_data = require("html-css.parsers.html").setup(args.buf)
 			local sources = vim.list_extend(opts.style_sheets, html_data.cdn)
 
+			vim.print(html_data)
+
 			if #html_data.raw_text > 0 then
-				local inline_source = "buffer://" .. args.buf .. "/inline-styles"
+				local inline_source = args.file
 				local data = require("html-css.parsers.css").setup(html_data.raw_text)
-
 				cache:update(inline_source, data)
-
 				for _, src in pairs(data.imports) do
-					fetcher:fetch(src, args.buf, opts.notify)
+					-- fetcher:fetch(src, args.buf, opts.notify)
 					table.insert(sources, src)
 				end
 
 				table.insert(sources, inline_source)
 			end
 
-			cache:link_buffer(args.buf, sources)
 
 			for _, src in pairs(sources) do
 				fetcher:fetch(src, args.buf, opts.notify)
 			end
+
+			cache:link_buffer(args.buf, sources)
 		end
 	})
 

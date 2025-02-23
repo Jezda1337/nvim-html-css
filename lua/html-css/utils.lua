@@ -1,24 +1,10 @@
 local utils = {}
+local uv = vim.uv
 
 ---@param path string
 utils.resolve_path = function(path)
-	if path:match("^https?://") then
-		return path
-	end
-	return vim.fn.fnamemodify(path, ":p")
-end
-
----@param import string
----@param bufnr integer
-utils.resolve_import = function(import, bufnr)
-	local path = import:match("^['\"](.*)['\"]$") or import
-	if path:match("^https?://") then
-		return path
-	end
-
-	local current_file = vim.api.nvim_buf_get_name(bufnr)
-	local current_dir = vim.fn.fnamemodify(current_file, ":h")
-	return vim.fn.simplify(current_dir .. "/" .. path)
+	if utils.is_remote(path) then return path end
+	return uv.fs_realpath(path) or ""
 end
 
 ---@param path string
