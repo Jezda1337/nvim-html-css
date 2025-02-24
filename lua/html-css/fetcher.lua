@@ -39,22 +39,22 @@ function fetcher:_fetch_local(path, bufnr, notify)
 
 	local data = require("html-css.parsers.css").setup(content)
 	cache:update(path, data)
-	self:_process_imports(data.imports, bufnr, notify)
+	self:_process_imports(path, data.imports, bufnr, notify)
 end
 
-function fetcher:_process_imports(imports, bufnr, notify)
+function fetcher:_process_imports(parent_path, imports, bufnr, notify)
 	local sources = {}
-	for _, imp in ipairs(imports) do
+	for _, imp in pairs(imports) do
 		local resolved = utils.resolve_path(imp)
-		if resolved then
-			table.insert(sources, resolved)
-			self:fetch(resolved, bufnr, notify)
-		end
+		self:fetch(resolved, bufnr, notify)
+		table.insert(sources, resolved)
 	end
 
-	if #sources > 0 then
-		cache:link_buffer(bufnr, sources)
+	for src, _ in pairs(cache._buffers[bufnr].sources or {}) do
+		table.insert(sources, src)
 	end
+
+	cache:link_buffers(bufnr, sources)
 end
 
 return fetcher

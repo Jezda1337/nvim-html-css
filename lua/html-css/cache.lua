@@ -4,13 +4,9 @@ local utils = require "html-css.utils"
 local cache = {
 	_sources = {},
 	_buffers = {},
-	_watchers = {},
-
-	_version = 0
+	_watchers = {}
 }
 
----@param source string
----@param data table<any>
 function cache:update(source, data)
 	local resolved = utils.resolve_path(source)
 	local now = os.time()
@@ -38,15 +34,11 @@ function cache:update(source, data)
 
 	insert_items(data.class or {}, self._sources[resolved].classes)
 	insert_items(data.id or {}, self._sources[resolved].ids)
-
-	self._version = self._version + 1
 end
 
----@param bufnr integer
----@param sources table<string>
-function cache:link_buffer(bufnr, sources)
+function cache:link_buffers(bufnr, sources)
 	local resolved_sources = {}
-	for _, src in ipairs(sources) do
+	for _, src in pairs(sources) do
 		local resolved = utils.resolve_path(src)
 		resolved_sources[resolved] = true
 
@@ -55,19 +47,12 @@ function cache:link_buffer(bufnr, sources)
 		end
 	end
 
-	local current_sources = self._buffers[bufnr] and self._buffers[bufnr].sources or {}
-	for resolved in pairs(resolved_sources) do
-		current_sources[resolved] = true
-	end
-
 	self._buffers[bufnr] = {
-		sources = current_sources,
-		version = self.version
+		sources = resolved_sources,
+		path = vim.api.nvim_buf_get_name(bufnr)
 	}
-	self._version = self._version + 1
 end
 
----@param path string
 function cache:_setup_watcher(path)
 	local handle = uv.new_fs_event()
 	if not handle then return end -- needs attention
@@ -79,7 +64,7 @@ end
 function cache:_handle_file_change(path)
 	local content = utils.read_file_sync(path)
 	if content then
-		local data = require("html-css.parsers.css").setup(content)
+		local data = require "html-css.parsers.css".setup(content)
 		self:update(path, data)
 	end
 end
@@ -101,40 +86,6 @@ function cache:_get_classes(bufnr)
 	end
 
 	return classes
-end
-
----@param bufnr integer
-function cache:_get_ids(bufnr)
-	local buffer_sources = self._buffers[bufnr].sources or {}
-	local ids = {}
-
-	for source, _ in pairs(buffer_sources) do
-		local source_data = self._sources[source]
-		if source_data then
-			for _, id in pairs(source_data.ids) do
-				id.source_name = source_data.meta.name
-				id.source_path = source_data.meta.path
-				table.insert(ids, id)
-			end
-		end
-	end
-
-	return ids
-end
-
----@param bufnr integer
-function cache:_clear_buffer(bufnr)
-	self._buffers[bufnr] = nil
-	-- TODO: Implement watcher cleanup when last buffer using a source is closed
-end
-
----@param source string
-function cache:_unwatch_source(source)
-	local resolved = utils.resolve_path(source)
-	if self._watchers[resolved] then
-		self._watchers[resolved]:stop()
-		self._watchers[resolved] = nil
-	end
 end
 
 return cache
