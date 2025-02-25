@@ -7,6 +7,17 @@ utils.resolve_path = function(path)
 	return uv.fs_realpath(path) or ""
 end
 
+function utils.resolve_import(import, bufnr)
+	local path = import:match("^['\"](.*)['\"]$") or import
+	if utils.is_remote(path) then
+		return path
+	end
+
+	local current_file = vim.api.nvim_buf_get_name(bufnr)
+	local current_dir = vim.fn.fnamemodify(current_file, ":h")
+	return vim.fn.simplify(current_dir .. "/" .. path)
+end
+
 ---@param path string
 utils.get_source_name = function(path)
 	if utils.is_remote(path) then
