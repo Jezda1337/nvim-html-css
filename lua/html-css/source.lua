@@ -1,6 +1,6 @@
 local ok, cmp = pcall(require, "cmp")
 local cache   = require("html-css.cache")
-local utils = require "html-css.utils"
+local utils   = require "html-css.utils"
 if not ok then return end
 
 local source = {}
@@ -42,7 +42,7 @@ function source:complete(params, callback)
 		items = self:_format_items(cache:_get_ids(bufnr))
 	end
 
-	callback({items = items})
+	callback({ items = items })
 end
 
 function source:_format_items(items)
@@ -50,12 +50,16 @@ function source:_format_items(items)
 		return {
 			label = item.label,
 			kind = cmp.lsp.CompletionItemKind.Field,
+			menu = item.source_name and ("🠖 " .. item.source_name) or "[Unknown]",
 			documentation = {
 				kind = cmp.lsp.MarkupKind.Markdown,
 				value = self:_create_docs(item)
 			},
 			dup = 1,
-			data = item
+			data = {
+				source_name = item.source_name,
+				source_type = item.source_type
+			}
 		}
 	end, items)
 end
