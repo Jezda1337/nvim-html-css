@@ -11,24 +11,24 @@ function cache:update(source, data)
 	local resolved = utils.resolve_path(source)
 	local now = os.time()
 
+	local source_type = utils.is_remote(resolved) and "remote" or "file"
+
 	self._sources[resolved] = {
 		classes = {},
 		ids = {},
 		meta = {
-			name = utils.get_source_name(source),
+			name = utils.get_source_name(resolved),
 			path = resolved,
-			mtime = utils.is_remote(source) and now or now,
-			type = utils.is_remote(source) and "remote" or "local"
+			mtime = now,
+			type = source_type
 		}
 	}
 
 	local function insert_items(items, target)
 		for _, item in ipairs(items) do
-			table.insert(target, {
-				label = item.label,
-				block = item.block,
-				kind = item.kind
-			})
+			item.source_name = self._sources[resolved].meta.name
+			item.source_type = source_type
+			table.insert(target, item)
 		end
 	end
 
