@@ -14,7 +14,7 @@ function fetcher:fetch(source, bufnr, notify)
 end
 
 function fetcher:_fetch_remote(url, bufnr, notify)
-	vim.system({ "curl", "-fsSL", "-L", url }, { text = true }, function(out)
+	vim.system({ "curl", "-fsSL", "-L", url }, { text = true }, vim.schedule_wrap(function(out)
 		if out.code ~= 0 then
 			cache._sources[utils.resolve_path(url)] = nil
 			if notify then
@@ -25,7 +25,7 @@ function fetcher:_fetch_remote(url, bufnr, notify)
 
 		local data = require("html-css.parsers.css").setup(out.stdout)
 		cache:update(url, data)
-	end)
+	end))
 end
 
 function fetcher:_fetch_local(path, bufnr, notify)
@@ -44,17 +44,26 @@ end
 
 function fetcher:_process_imports(parent_path, imports, bufnr, notify)
 	local sources = {}
-	for _, imp in pairs(imports) do
-		local resolved = utils.resolve_path(imp)
-		self:fetch(resolved, bufnr, notify)
-		table.insert(sources, resolved)
+
+	for _, imp in ipairs(imports) do
+		local resolved = utils.resolve_import(imp, bufnr)
+		if resolved then
+			sources[resolved] = true
+			self:fetch(resolved, bufnr, notify)
+		end
 	end
 
-	for src, _ in pairs(cache._buffers[bufnr].sources or {}) do
-		table.insert(sources, src)
+	local current_sources = cache._buffers[bufnr] and cache._buffers[bufnr].sources or {}
+	for src in pairs(current_sources) do
+		sources[src] = true
 	end
 
-	cache:link_buffers(bufnr, sources)
+	local final_sources = {}
+	for src in pairs(sources) do
+		table.insert(final_sources, src)
+	end
+
+	cache:link_buffers(bufnr, final_sources)
 end
 
 return fetcher
