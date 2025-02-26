@@ -1,6 +1,7 @@
 local utils    = require "html-css.utils"
 local config   = require "html-css.config"
 local cache    = require "html-css.cache"
+local fetcher  = require "html-css.fetcher"
 
 local html_css = {}
 
@@ -17,7 +18,11 @@ html_css.setup = function(opts)
 			local html_data = require "html-css.parsers.html".setup(args.buf)
 			local sources = vim.list_extend(html_data.cdn, opts.style_sheets)
 
-			cache:_link_sources(args.buf, sources)
+			for _, src in pairs(sources) do
+				fetcher:fetch(src, args.buf, opts.notify)
+			end
+
+			cache:link_sources(args.buf, sources)
 		end
 	})
 end
