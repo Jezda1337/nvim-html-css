@@ -8,7 +8,10 @@ local html_css = {}
 
 html_css.setup = function(opts)
 	opts = vim.tbl_extend("force", config, opts)
-	local i = 1
+
+	dofile(vim.uv.cwd() .. "/" .. (".nvim.lua" or ".nvimrc" or ".exrc"))
+	opts.style_sheets = vim.list_extend(opts.style_sheets, vim.g.style_sheets or {})
+
 	vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre", "WinEnter" }, {
 		group = vim.api.nvim_create_augroup("html-css", {}),
 		pattern = vim.tbl_map(function(ext) return "*." .. ext end, opts.enable_on),
