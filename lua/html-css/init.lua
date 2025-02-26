@@ -56,7 +56,7 @@ html_css.setup = function(opts)
 		end
 	})
 
-	cmp.register_source("html-css", require "html-css.source")
+	cmp.register_source("html-css", require "html-css.source":new(opts))
 end
 
 return html_css

@@ -5,12 +5,25 @@ if not ok then return end
 
 local source = {}
 
+function source:new(opts)
+	self.opts = opts or {}
+
+	return self
+end
+
 function source:get_trigger_character()
 	return { '"', "'", " " }
 end
 
 function source:is_available()
 	if utils.is_special_buffer(vim.api.nvim_get_current_buf()) then return false end
+
+	-- grab the file extension
+	local ext = vim.fn.expand("%:t:e")
+
+	if not utils.is_lang_enabled(ext, self.opts.enable_on) then
+		return false
+	end
 
 	local node = vim.treesitter.get_node()
 	self.context = nil
