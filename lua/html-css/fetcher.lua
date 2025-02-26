@@ -50,7 +50,7 @@ function fetcher:_process_imports(parent_path, imports, bufnr, notify)
 	local sources = {}
 
 	for _, imp in ipairs(imports) do
-		local resolved = utils.resolve_import(imp, bufnr)
+		local resolved = utils.resolve_path(imp)
 		if resolved then
 			cache:add_dependency(parent_path, resolved)
 			sources[resolved] = true
@@ -67,6 +67,8 @@ function fetcher:_process_imports(parent_path, imports, bufnr, notify)
 	for src in pairs(sources) do
 		table.insert(final_sources, src)
 	end
+
+	cache:cleanup_dependencies(bufnr)
 
 	cache:link_buffers(bufnr, final_sources)
 end

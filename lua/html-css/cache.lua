@@ -73,8 +73,17 @@ end
 function cache:link_buffers(bufnr, sources)
 	local expanded_sources = {}
 
+	for _, src in pairs(sources) do
+		local resolved = utils.resolve_path(src)
+		expanded_sources[resolved] = true
+
+		if utils.is_local(resolved) and not self._watchers[resolved] then
+			self:_setup_watcher(resolved, bufnr)
+		end
+	end
+
 	local function expand_deps(src)
-		if expanded_sources[src] then return end
+		if expanded_sources[src] and not self:get_dependencies(src) then return end
 		expanded_sources[src] = true
 
 		for dep in pairs(self:get_dependencies(src)) do
@@ -89,22 +98,24 @@ function cache:link_buffers(bufnr, sources)
 
 	self._buffers[bufnr] = {
 		sources = expanded_sources,
-		path = vim.api.nvim_buf_get_name(bufnr)
+		-- path = vim.api.nvim_buf_get_name(bufnr)
 	}
 end
 
-function cache:_setup_watcher(path)
+function cache:_setup_watcher(path, bufnr)
 	local handle = uv.new_fs_event()
 	if not handle then return end -- needs attention
+	self._watchers[path] = handle
 	uv.fs_event_start(handle, path, {}, function()
-		self:_handle_file_change(path)
+		self:_handle_file_change(path, bufnr)
 	end)
 end
 
-function cache:_handle_file_change(path)
+function cache:_handle_file_change(path, bufnr)
 	local content = utils.read_file_sync(path)
 	if content then
 		local data = require "html-css.parsers.css".setup(content)
+		require("html-css.fetcher"):_process_imports(path, data.imports, bufnr, false)
 		self:update(path, data)
 	end
 end
