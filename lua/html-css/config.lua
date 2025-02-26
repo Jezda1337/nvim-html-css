@@ -1,8 +1,8 @@
 return {
 	enable_on = { "html", "css" },
-	style_sheets = {},
 	notify = true,
+	style_sheets = {},
 	documentation = {
 		auto_show = true,
-	},
+	}
 }

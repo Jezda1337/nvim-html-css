@@ -1,4 +1,4 @@
-local utils = require("html-css.parsers.utils")
+local utils = require "html-css.parsers.utils"
 local css = {}
 local ts = vim.treesitter
 

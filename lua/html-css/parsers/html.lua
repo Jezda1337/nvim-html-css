@@ -1,4 +1,4 @@
-local utils = require("html-css.parsers.utils")
+local utils = require "html-css.parsers.utils"
 local ts = vim.treesitter
 local html = {}
 
@@ -24,7 +24,6 @@ html.setup = function(bufnr)
 			local name = query.captures[id]
 			for _, node in ipairs(nodes) do
 				if name == "href_value" then
-					-- data.cdn = data.cdn .. ts.get_node_text(node, bufnr)
 					table.insert(data.cdn, ts.get_node_text(node, bufnr))
 				elseif name == "rw" then
 					data.raw_text = data.raw_text .. ts.get_node_text(node, bufnr)
