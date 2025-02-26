@@ -35,7 +35,7 @@ end
 ---@param path string
 utils.resolve_path = function(path)
 	if utils.is_remote(path) then return path end
-	return uv.fs_realpath(path) or ""
+	return uv.fs_realpath(path) or path or ""
 end
 
 ---@param bufnr integer
