@@ -3,14 +3,22 @@ local cmp      = require "cmp"
 local utils    = require "html-css.utils"
 local fetcher  = require "html-css.fetcher"
 local cache    = require "html-css.cache"
+local uv       = vim.uv
+local cwd      = uv.cwd()
 
 local html_css = {}
 
 html_css.setup = function(opts)
 	opts = vim.tbl_extend("force", config, opts)
 
-	dofile(vim.uv.cwd() .. "/" .. (".nvim.lua" or ".nvimrc" or ".exrc"))
+	local project_based_config = cwd .. "/" .. (".nvim.lua" or ".nvimrc" or ".exrc")
+
+	if vim.fn.filereadable(project_based_config) == 1 then
+		dofile(project_based_config)
+	end
+
 	opts.style_sheets = vim.list_extend(opts.style_sheets, vim.g.style_sheets or {})
+	opts.enable_on = vim.list_extend(opts.enable_on, vim.g.enable_on or {})
 
 	vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre", "WinEnter" }, {
 		group = vim.api.nvim_create_augroup("html-css", {}),
