@@ -25,6 +25,8 @@ html_css.setup = function(opts)
 			cache:link_sources(args.buf, sources)
 		end
 	})
+
+	require "cmp".register_source("html-css", require "html-css.source":new(opts))
 end
 
 return html_css
