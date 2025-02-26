@@ -3,9 +3,43 @@ local utils = require "html-css.utils"
 
 local cache = {
 	_sources = {},
+	_dependencies = {},
 	_buffers = {},
 	_watchers = {}
 }
+
+function cache:add_dependency(parent, child)
+	local resolved_parent = utils.resolve_path(parent)
+	local resolved_child = utils.resolve_path(child)
+	self._dependencies[resolved_parent] = self._dependencies[resolved_parent] or {}
+	self._dependencies[resolved_parent][resolved_child] = true
+end
+
+function cache:get_dependencies(source)
+	return self._dependencies[utils.resolve_path(source)] or {}
+end
+
+function cache:cleanup_dependencies(bufnr)
+	local current_sources = self._buffers[bufnr] and self._buffers[bufnr].sources or {}
+	local keep_deps = {}
+
+	-- Find dependencies still needed
+	for src in pairs(current_sources) do
+		for dep in pairs(self:get_dependencies(src)) do
+			keep_deps[dep] = true
+		end
+	end
+
+	-- Remove orphaned dependencies
+	local final_sources = {}
+	for src in pairs(current_sources) do
+		if keep_deps[src] or self._dependencies[src] then
+			final_sources[src] = true
+		end
+	end
+
+	self._buffers[bufnr].sources = final_sources
+end
 
 function cache:update(source, data)
 	local resolved = utils.resolve_path(source)
@@ -37,18 +71,24 @@ function cache:update(source, data)
 end
 
 function cache:link_buffers(bufnr, sources)
-	local resolved_sources = {}
-	for _, src in pairs(sources) do
-		local resolved = utils.resolve_path(src)
-		resolved_sources[resolved] = true
+	local expanded_sources = {}
 
-		if utils.is_local(resolved) and not self._watchers[resolved] then
-			self:_setup_watcher(resolved)
+	local function expand_deps(src)
+		if expanded_sources[src] then return end
+		expanded_sources[src] = true
+
+		for dep in pairs(self:get_dependencies(src)) do
+			expand_deps(dep)
 		end
 	end
 
+	for _, src in pairs(sources) do
+		local resolved = utils.resolve_path(src)
+		expand_deps(resolved)
+	end
+
 	self._buffers[bufnr] = {
-		sources = resolved_sources,
+		sources = expanded_sources,
 		path = vim.api.nvim_buf_get_name(bufnr)
 	}
 end

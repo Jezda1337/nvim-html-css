@@ -23,6 +23,10 @@ function fetcher:_fetch_remote(url, bufnr, notify)
 			return
 		end
 
+		if notify then
+			vim.notify(url, vim.log.levels.INFO)
+		end
+
 		local data = require("html-css.parsers.css").setup(out.stdout)
 		cache:update(url, data)
 	end))
@@ -48,6 +52,7 @@ function fetcher:_process_imports(parent_path, imports, bufnr, notify)
 	for _, imp in ipairs(imports) do
 		local resolved = utils.resolve_import(imp, bufnr)
 		if resolved then
+			cache:add_dependency(parent_path, resolved)
 			sources[resolved] = true
 			self:fetch(resolved, bufnr, notify)
 		end
