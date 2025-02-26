@@ -27,4 +27,12 @@ function fetcher:_fetch_remote(source, bufnr)
 	end)
 end
 
+function fetcher:_fetch_local(source, bufnr)
+	local resolved = utils.resolve_path(source)
+	utils.read_file(resolved, function(out)
+		local css_data = require "html-css.parsers.css".setup(out)
+		cache:update(source, css_data)
+	end)
+end
+
 return fetcher
