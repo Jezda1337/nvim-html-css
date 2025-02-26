@@ -2,6 +2,25 @@ local uv = vim.uv
 local utils = {}
 
 ---@param path string
+---@param cb function
+utils.read_file = function(path, cb)
+	-- uv.fs_open(vim.fn.expand("%:p:h") .. "/" .. path, "r", 438, function(err, fd)
+	uv.fs_open(path, "r", 438, function(err, fd)
+		assert(not err, err)
+		uv.fs_fstat(fd, function(err, stat)
+			assert(not err, err)
+			uv.fs_read(fd, stat.size, 0, function(err, data)
+				assert(not err, err)
+				uv.fs_close(fd, function(err)
+					assert(not err, err)
+					return cb(data)
+				end)
+			end)
+		end)
+	end)
+end
+
+---@param path string
 ---@return string
 utils.get_source_name = function(path)
 	if utils.is_remote(path) then
