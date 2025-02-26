@@ -18,8 +18,16 @@ html_css.setup = function(opts)
 			local html_data = require "html-css.parsers.html".setup(args.buf)
 			local sources = vim.list_extend(html_data.cdn, opts.style_sheets)
 
+			if #html_data.raw_text > 0 then
+				local css_data = require "html-css.parsers.css".setup(html_data.raw_text)
+				cache:update("buffer://" .. args.file, css_data)
+				table.insert(sources, "buffer://" .. args.file)
+			end
+
 			for _, src in pairs(sources) do
+				if src:match("buffer://") then goto continue end
 				fetcher:fetch(src, args.buf, opts.notify)
+			    ::continue::
 			end
 
 			cache:link_sources(args.buf, sources)
