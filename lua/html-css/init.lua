@@ -32,6 +32,11 @@ html_css.setup = function(opts)
 			if #html_data.raw_text > 0 then
 				local css_data = require "html-css.parsers.css".setup(html_data.raw_text)
 				cache:update("buffer://" .. args.file, css_data)
+				if #css_data.imports > 0 then
+					for _, imp in pairs(css_data.imports) do
+						table.insert(sources, imp)
+					end
+				end
 				table.insert(sources, "buffer://" .. args.file)
 			end
 
