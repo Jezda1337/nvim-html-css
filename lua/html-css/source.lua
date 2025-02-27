@@ -64,7 +64,7 @@ function source:_format_items(items)
 	return vim.tbl_map(function(item)
 		return {
 			label = item.label,
-			kind = cmp.lsp.CompletionItemKind.Enum,
+			kind = cmp.lsp.CompletionItemKind.Constant,
 			menu = item.source_name and ("🠖 " .. item.source_name) or "[Unknown]",
 			documentation = {
 				kind = cmp.lsp.MarkupKind.Markdown,
