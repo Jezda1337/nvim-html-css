@@ -67,9 +67,6 @@ css.setup = function(stdout)
 				end
 				if name == "value" then
 					table.insert(css_data.imports, ts.get_node_text(node, stdout))
-					-- table.insert(css_data.imports, {
-					-- 	source = ts.get_node_text(node, stdout)
-					-- })
 				end
 			end
 		end

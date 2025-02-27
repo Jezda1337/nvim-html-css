@@ -4,7 +4,6 @@ local utils = {}
 ---@param path string
 ---@param cb function
 utils.read_file = function(path, cb)
-	-- uv.fs_open(vim.fn.expand("%:p:h") .. "/" .. path, "r", 438, function(err, fd)
 	uv.fs_open(path, "r", 438, function(err, fd)
 		assert(not err, err)
 		uv.fs_fstat(fd, function(err, stat)
@@ -66,4 +65,5 @@ utils.is_special_buffer = function(bufnr)
 	end
 	return false
 end
+
 return utils
