@@ -30,7 +30,7 @@ function source:is_available()
 	self.context = nil
 
 	while node do
-		if node:type() == "attribute" then
+		if node:type() == "attribute" or node:type() == "jsx_attribute" then
 			local attr_name = vim.treesitter.get_node_text(node:child(0), 0)
 			if attr_name == "class" or attr_name == "className" then
 				self.context = "class"
