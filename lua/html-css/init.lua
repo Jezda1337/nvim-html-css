@@ -8,7 +8,7 @@ local html_css = {}
 html_css.setup = function(opts)
 	opts = vim.tbl_extend("force", config, opts)
 
-	vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre" }, {
+	vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre", "WinEnter" }, {
 		group = vim.api.nvim_create_augroup("html-csss", { clear = true }),
 		pattern = vim.tbl_map(function(ext) return "*." .. ext end, opts.enable_on),
 		callback = function(args)
