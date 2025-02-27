@@ -1,12 +1,23 @@
-local utils    = require "html-css.utils"
-local config   = require "html-css.config"
-local cache    = require "html-css.cache"
-local fetcher  = require "html-css.fetcher"
+local utils   = require "html-css.utils"
+local config  = require "html-css.config"
+local cache   = require "html-css.cache"
+local fetcher = require "html-css.fetcher"
+local uv      = vim.uv
+local cwd     = uv.cwd()
+
 
 local html_css = {}
 
 html_css.setup = function(opts)
 	opts = vim.tbl_extend("force", config, opts)
+
+	vim.opt.ex = true
+	local project_config_path = cwd .. "/" .. ".nvim.lua"
+	if uv.fs_stat(project_config_path) then
+		dofile(project_config_path)
+		local project_config = vim.g.html_css or {}
+		opts = vim.tbl_deep_extend("force", opts, project_config)
+	end
 
 	vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre", "WinEnter" }, {
 		group = vim.api.nvim_create_augroup("html-csss", { clear = true }),
@@ -27,7 +38,7 @@ html_css.setup = function(opts)
 			for _, src in pairs(sources) do
 				if src:match("buffer://") then goto continue end
 				fetcher:fetch(src, args.buf, opts.notify)
-			    ::continue::
+				::continue::
 			end
 
 			cache:link_sources(args.buf, sources)
