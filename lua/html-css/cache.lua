@@ -2,7 +2,8 @@ local utils = require "html-css.utils"
 
 local cache = {
 	_sources = {},
-	_buffers = {}
+	_buffers = {},
+	_watchers = {}
 }
 
 ---@param bufnr integer
@@ -67,11 +68,51 @@ function cache:link_sources(bufnr, sources)
 				resolved_sources[imp] = true
 			end
 		end
+
+		if utils.is_local(resolved) and not self._watchers[resolved] and not resolved:match("buffer://") then
+			vim.schedule(function()
+				self:_setup_watchers(resolved)
+			end)
+		end
 	end
 
 	self._buffers[bufnr] = {
 		_sources = resolved_sources
 	}
+end
+
+---@param path string
+function cache:_setup_watchers(path)
+	if self._watchers[path] then return end
+	local handler = vim.uv.new_fs_event()
+	if not handler then return end --INFO attention needed
+	self._watchers[path] = handler
+	vim.uv.fs_event_start(handler, path, {}, function(err, fname, stats)
+		vim.schedule(function()
+			self:_handle_file_change(handler, path, err, fname, stats)
+		end)
+	end)
+end
+
+---@param handler uv.uv_fs_event_t
+---@param path string
+---@param err string | nil
+---@param fname string
+---@param stats table<string, boolean|nil>
+function cache:_handle_file_change(handler, path, err, fname, stats)
+	utils.read_file(path, function(out)
+		local css_data = require "html-css.parsers.css".setup(out)
+		self:update(path, css_data)
+		for _, src in pairs(css_data.imports) do
+			require "html-css.fetcher":fetch(src, 0, false)
+		end
+	end)
+
+	-- Debounce: stop and restart the watcher
+	handler:stop()
+	handler:start(path, {}, vim.schedule_wrap(function()
+		self:_handle_file_change(handler, path, err, fname, stats)
+	end))
 end
 
 ---@param source string
