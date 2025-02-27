@@ -47,6 +47,7 @@ function source:is_available()
 end
 
 function source:complete(params, callback)
+	---@type Selector[]
 	local items = {}
 	local bufnr = params.context.bufnr
 
@@ -79,12 +80,25 @@ function source:_format_items(items)
 end
 
 function source:_create_docs(item)
+	local formatted_css = item.block
+		-- Add newline after opening brace with proper indentation
+		:gsub("{%s*", " {\n  ")
+		-- Add newline and indent after semicolons
+		:gsub(";%s*", ";\n  ")
+		-- Add space after colon if missing
+		:gsub(":%s*", ": ")
+		-- Handle properties without semicolons at the end (like your example)
+		:gsub("([^;{}])%s*}", "\\1;\n}")
+		-- Clean up any potential double spaces in indentation
+		:gsub("\n%s+", "\n  ")
+		-- Ensure proper spacing around important declarations
+		:gsub("!important", " !important")
+
 	return string.format(
-		"```css\n/* Source: %s */\n%s\n```",
+		"```css\n/* Source: %s */\n.%s%s\n```",
 		item.source_name,
-		item.block:gsub("%s*{%s*", " {\n  ")
-		:gsub("%s*;%s*", ";\n  ")
-		:gsub("%s*}", "\n}")
+		item.label,
+		formatted_css
 	)
 end
 
