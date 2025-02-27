@@ -20,7 +20,7 @@ function cache:get_classes(bufnr)
 end
 
 ---@param source string
----@param data table<any>
+---@param data CSS_Data
 function cache:update(source, data)
 	local resolved = utils.resolve_path(source)
 	local now = os.time()

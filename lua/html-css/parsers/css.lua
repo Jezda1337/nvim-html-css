@@ -38,9 +38,10 @@ css.query = [[
 ]]
 
 ---@param stdout string
----@return table<any>
+---@return CSS_Data
 css.setup = function(stdout)
 	local root, query = utils.string_parse(css.lang, css.query, stdout)
+	---@type CSS_Data
 	local css_data = {
 		imports = {},
 		class = {},

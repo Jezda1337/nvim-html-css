@@ -1,8 +1,10 @@
 local utils = require "html-css.parsers.utils"
-local ts = vim.treesitter
+local ts    = vim.treesitter
+
+
 local html = {}
 
-html.lang = "html"
+html.lang  = "html"
 html.query = [[
 ((tag_name) @tag (#eq? @tag "link")
 	  (attribute
@@ -13,7 +15,8 @@ html.query = [[
 ((raw_text)@rw)
 ]]
 
----@type fun(bufnr: integer): { cdn: table, raw_text: string }
+---@param bufnr integer
+---@return HTML_Data
 html.setup = function(bufnr)
 	local root, query = utils.parse(html.lang, html.query, bufnr)
 

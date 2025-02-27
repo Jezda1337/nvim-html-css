@@ -8,6 +8,7 @@ local cwd     = uv.cwd()
 
 local html_css = {}
 
+---@param opts Config
 html_css.setup = function(opts)
 	opts = vim.tbl_extend("force", config, opts)
 

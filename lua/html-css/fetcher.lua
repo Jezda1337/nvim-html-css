@@ -3,6 +3,9 @@ local cache = require "html-css.cache"
 
 local fetcher = {}
 
+---@param source string
+---@param bufnr integer
+---@param notify boolean
 function fetcher:fetch(source, bufnr, notify)
 	if utils.is_remote(source) then
 		self:_fetch_remote(source, bufnr)
@@ -11,6 +14,8 @@ function fetcher:fetch(source, bufnr, notify)
 	end
 end
 
+---@param source string
+---@param bufnr integer
 function fetcher:_fetch_remote(source, bufnr)
 	if cache:has_source(source) then return end
 
@@ -27,6 +32,8 @@ function fetcher:_fetch_remote(source, bufnr)
 	end)
 end
 
+---@param source string
+---@param bufnr integer
 function fetcher:_fetch_local(source, bufnr)
 	local resolved = utils.resolve_path(source)
 	utils.read_file(resolved, function(out)
@@ -38,6 +45,10 @@ function fetcher:_fetch_local(source, bufnr)
 	end)
 end
 
+---@param resolved_parent string
+---@param imports table<string>
+---@param bufnr integer
+---@param notify boolean
 function fetcher:_process_imports(resolved_parent, imports, bufnr, notify)
 	local sources = {}
 

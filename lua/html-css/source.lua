@@ -5,6 +5,7 @@ if not ok then return end
 
 local source = {}
 
+---@param opts Config
 function source:new(opts)
 	self.opts = opts or {}
 
@@ -17,7 +18,6 @@ end
 
 function source:is_available()
 	if utils.is_special_buffer(vim.api.nvim_get_current_buf()) then return false end
-
 
 	-- grab the file extension
 	local ext = vim.fn.expand("%:t:e")
