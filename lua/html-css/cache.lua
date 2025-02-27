@@ -29,6 +29,7 @@ function cache:update(source, data)
 	self._sources[resolved] = {
 		classes = {},
 		ids = {},
+		imports = {},
 		meta = {
 			name = utils.get_source_name(resolved),
 			path = resolved,
@@ -46,6 +47,11 @@ function cache:update(source, data)
 	end
 
 	insert_items(data.class, self._sources[resolved].classes)
+
+	for _, imp in pairs(data.imports) do
+		local resolved_imp = utils.resolve_path(imp)
+		table.insert(self._sources[resolved].imports, resolved_imp)
+	end
 end
 
 ---@param bufnr integer
@@ -55,6 +61,12 @@ function cache:link_sources(bufnr, sources)
 	for _, src in pairs(sources) do
 		local resolved = utils.resolve_path(src)
 		resolved_sources[resolved] = true
+
+		if self._sources[resolved] and self._sources[resolved].imports then
+			for _, imp in pairs(self._sources[resolved].imports or {}) do
+				resolved_sources[imp] = true
+			end
+		end
 	end
 
 	self._buffers[bufnr] = {

@@ -32,7 +32,28 @@ function fetcher:_fetch_local(source, bufnr)
 	utils.read_file(resolved, function(out)
 		local css_data = require "html-css.parsers.css".setup(out)
 		cache:update(source, css_data)
+		if #css_data.imports > 0 then
+			self:_process_imports(resolved, css_data.imports, bufnr, false)
+		end
 	end)
+end
+
+function fetcher:_process_imports(resolved_parent, imports, bufnr, notify)
+	local sources = {}
+
+	for _, imp in pairs(imports) do
+		local resolved = utils.resolve_path(imp)
+		if resolved then
+			table.insert(sources, imp)
+			self:fetch(resolved, bufnr, notify)
+		end
+	end
+
+	for src, _ in pairs(cache._buffers[bufnr]._sources or {}) do
+		table.insert(sources, src)
+	end
+
+	cache:link_sources(bufnr, sources)
 end
 
 return fetcher
