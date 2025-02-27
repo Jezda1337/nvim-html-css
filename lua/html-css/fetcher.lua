@@ -8,15 +8,15 @@ local fetcher = {}
 ---@param notify boolean
 function fetcher:fetch(source, bufnr, notify)
 	if utils.is_remote(source) then
-		self:_fetch_remote(source, bufnr)
+		self:_fetch_remote(source, notify)
 	elseif utils.is_local(source) then
-		self:_fetch_local(source, bufnr)
+		self:_fetch_local(source, bufnr, notify)
 	end
 end
 
 ---@param source string
----@param bufnr integer
-function fetcher:_fetch_remote(source, bufnr)
+---@param notify boolean
+function fetcher:_fetch_remote(source, notify)
 	if cache:has_source(source) then return end
 
 	vim.system({ "curl", source }, { text = true }, function(out)
@@ -27,6 +27,12 @@ function fetcher:_fetch_remote(source, bufnr)
 			return
 		end
 
+		if notify then
+			vim.schedule(function()
+				vim.notify("GET: " .. source, vim.log.levels.INFO)
+			end)
+		end
+
 		local css_data = require "html-css.parsers.css".setup(out.stdout)
 		cache:update(source, css_data)
 	end)
@@ -34,22 +40,29 @@ end
 
 ---@param source string
 ---@param bufnr integer
-function fetcher:_fetch_local(source, bufnr)
+---@param notify boolean
+function fetcher:_fetch_local(source, bufnr, notify)
 	local resolved = utils.resolve_path(source)
+
+	if notify then
+		vim.schedule(function()
+			vim.notify("PARSED: " .. resolved, vim.log.levels.INFO)
+		end)
+	end
+
 	utils.read_file(resolved, function(out)
 		local css_data = require "html-css.parsers.css".setup(out)
 		cache:update(source, css_data)
 		if #css_data.imports > 0 then
-			self:_process_imports(resolved, css_data.imports, bufnr, false)
+			self:_process_imports(css_data.imports, bufnr, notify)
 		end
 	end)
 end
 
----@param resolved_parent string
 ---@param imports table<string>
 ---@param bufnr integer
 ---@param notify boolean
-function fetcher:_process_imports(resolved_parent, imports, bufnr, notify)
+function fetcher:_process_imports(imports, bufnr, notify)
 	local sources = {}
 
 	for _, imp in pairs(imports) do
