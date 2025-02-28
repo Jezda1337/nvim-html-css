@@ -7,7 +7,7 @@ local cache = {
 }
 
 ---@param bufnr integer
----@return table<table>
+---@return Selector[]
 function cache:get_classes(bufnr)
 	local buffer_sources = self._buffers[bufnr]._sources or {}
 	local classes = {}
@@ -17,6 +17,19 @@ function cache:get_classes(bufnr)
 	end
 
 	return classes
+end
+
+---@param bufnr integer
+---@return Selector[]
+function cache:get_ids(bufnr)
+	local buffer_sources = self._buffers[bufnr]._sources or {}
+	local ids = {}
+
+	for src in pairs(buffer_sources) do
+		vim.list_extend(ids, self._sources[src].ids)
+	end
+
+	return ids
 end
 
 ---@param source string

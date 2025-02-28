@@ -54,7 +54,7 @@ function source:complete(params, callback)
 	if self.context == "class" then
 		items = self:_format_items(cache:get_classes(bufnr))
 	elseif self.context == "id" then
-		-- items = self:_format_items(cache:get_ids(bufnr))
+		items = self:_format_items(cache:get_ids(bufnr))
 	end
 
 	callback({ items = items })
