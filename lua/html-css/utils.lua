@@ -1,9 +1,19 @@
 local uv = vim.uv
 local utils = {}
 
+-- FIXME
+string.start_with = function(self, str)
+	return self:find("^" .. str)
+end
+
 ---@param path string
 ---@param cb function
 utils.read_file = function(path, cb)
+	-- TODO
+	if path:start_with("./") then
+		path = path:gsub("./", "/")
+		path = vim.fn.expand("%:p:h") .. path
+	end
 	uv.fs_open(path, "r", 438, function(err, fd)
 		assert(not err, err)
 		uv.fs_fstat(fd, function(err, stat)
