@@ -27,32 +27,32 @@ CSS IntelliSense for HTML
 
 ```lua
 {
-    "Jezda1337/nvim-html-css",
-    dependencies = { "hrsh7th/nvim-cmp", "nvim-treesitter/nvim-treesitter" }, -- Use this if you're using nvim-cmp
-    -- dependencies = { "saghen/blink.cmp", "nvim-treesitter/nvim-treesitter" }, -- Use this if you're using blink.cmp
-    opts = {
-        enable_on = { -- Example file types
-            "html",
-            "htmldjango",
-            "tsx",
-            "jsx",
-            "erb",
-            "svelte",
-            "vue",
-            "blade",
-            "php",
-            "templ",
-            "astro",
-        },
-        documentation = {
-            auto_show = true,
-        },
-        style_sheets = {
-            "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css",
-            "https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.3/css/bulma.min.css",
-            "./index.css", -- `./` refers to the current working directory.
-        },
+  "Jezda1337/nvim-html-css",
+  dependencies = { "hrsh7th/nvim-cmp", "nvim-treesitter/nvim-treesitter" }, -- Use this if you're using nvim-cmp
+  -- dependencies = { "saghen/blink.cmp", "nvim-treesitter/nvim-treesitter" }, -- Use this if you're using blink.cmp
+  opts = {
+    enable_on = { -- Example file types
+      "html",
+      "htmldjango",
+      "tsx",
+      "jsx",
+      "erb",
+      "svelte",
+      "vue",
+      "blade",
+      "php",
+      "templ",
+      "astro",
     },
+    documentation = {
+      auto_show = true,
+    },
+    style_sheets = {
+      "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css",
+      "https://cdnjs.cloudflare.com/ajax/libs/bulma/1.0.3/css/bulma.min.css",
+      "./index.css", -- `./` refers to the current working directory.
+    },
+  },
 }
 ```
 
@@ -91,8 +91,8 @@ Here’s the default configuration from their wiki—you just need to add `html-
         }
       },
       appearance = {
-        use_nvim_cmp_as_default = true, 
-        nerd_font_variant = "mono" 
+        use_nvim_cmp_as_default = true,
+        nerd_font_variant = "mono"
       },
       sources = {
         default = { "lsp", "path", "snippets", "buffer", "html-css" },
@@ -113,26 +113,82 @@ Here’s the default configuration from their wiki—you just need to add `html-
 
 ```lua
 {
-    enable_on = { "html" },
-    documentation = {
-        auto_show = true,
-    },
-    style_sheets = {}
+  enable_on = { "html" },
+  documentation = {
+    auto_show = true,
+  },
+  style_sheets = {}
 }
 ```
 
 ## 🤩 Pretty Menu Items  
 
 To display the file name and extension in the completion menu, modify the formatter like this:  
-
+### blink.cmp
 ```lua
 require("cmp").setup({
-    formatting = {
-        format = function(entry, vim_item)
-            if entry.source.name == "html-css" then
-                vim_item.menu = "[" .. (entry.completion_item.provider or "html-css") .. "]"
-            end
-            return vim_item
-        end
-    }
+  formatting = {
+    format = function(entry, vim_item)
+      if entry.source.name == "html-css" then
+        vim_item.menu = "[" .. (entry.completion_item.provider or "html-css") .. "]"
+      end
+      return vim_item
+    end
+  }
 })
+```
+
+### blink.cmp
+```lua
+{
+  completion = {
+    documentation = {
+      auto_show = true,
+      auto_show_delay_ms = 500,
+    },
+    menu = {
+      draw = {
+        treesitter = { "lsp" },
+        columns = { { "kind_icon" }, { "label", "label_description", gap = 1 } },
+        components = {
+          kind_icon = {
+            ellipsis = true,
+            text = function(ctx)
+              local kind_icon = require "config.icons"[ctx.kind]
+              return kind_icon .. "|"
+            end,
+          },
+          label_description = {
+            text = function(ctx)
+              local item = ctx.item
+
+              local sources = {
+                {
+                  pattern = "bootstrap",
+                  label = "[Bootstrap]",
+                  icon = " "
+                },
+                {
+                  pattern = "foundation",
+                  label = "[Foundation]",
+                  icon = "履 "
+                },
+              }
+
+              if ctx.source_name == "html-css" then
+                for _, s in pairs(sources) do
+                  if item.data.source_name:match(s.pattern) then
+                    return s.icon
+                  elseif item.data.source_type == "local" then
+                    return "local"
+                  end
+                end
+              end
+            end
+          }
+        }
+      }
+    }
+  }
+}
+```
