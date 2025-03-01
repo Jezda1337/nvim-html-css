@@ -21,7 +21,7 @@ html_css.setup = function(opts)
 	end
 
 	vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre" }, {
-		group = vim.api.nvim_create_augroup("html-csss", { clear = true }),
+		group = vim.api.nvim_create_augroup("html-css", { clear = true }),
 		pattern = vim.tbl_map(function(ext) return "*." .. ext end, opts.enable_on),
 		callback = function(args)
 			if utils.is_special_buffer(args.buf) then return end
