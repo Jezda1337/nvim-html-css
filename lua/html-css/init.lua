@@ -51,6 +51,13 @@ html_css.setup = function(opts)
 		end
 	})
 
+	vim.api.nvim_create_autocmd("BufDelete", {
+		group = vim.api.nvim_create_augroup("html-css-cleanup", { clear = true }),
+		callback = function(args)
+			cache:cleanup(args.buf)
+		end
+	})
+
 	require "cmp".register_source("html-css", require "html-css.source":new(opts))
 end
 

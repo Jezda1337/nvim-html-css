@@ -134,4 +134,9 @@ function cache:has_source(source)
 	return cache._sources[source] ~= nil
 end
 
+---@param bufnr integer
+function cache:cleanup(bufnr)
+	self._buffers[bufnr] = nil
+end
+
 return cache
