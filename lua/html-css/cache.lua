@@ -45,7 +45,6 @@ function cache:update(source, data)
 		ids = {},
 		imports = {},
 		meta = {
-			name = utils.get_source_name(resolved),
 			path = resolved,
 			mtime = now,
 			type = source_type
@@ -54,7 +53,7 @@ function cache:update(source, data)
 
 	local function insert_items(items, target)
 		for _, item in ipairs(items) do
-			item.source_name = self._sources[resolved].meta.name
+			item.source_name = self._sources[resolved].meta.path
 			item.source_type = source_type
 			table.insert(target, item)
 		end
