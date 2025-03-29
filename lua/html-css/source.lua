@@ -79,8 +79,7 @@ function source:_format_items(items)
 	end, items)
 end
 
--- TODO _create_docs needs more love
--- many css fun like hsl and vars are not properly formatted
+-- TODO css block need refactoring with better css formatting
 function source:_create_docs(item)
 	local formatted_css = item.block
 		-- Add newline after opening brace with proper indentation

@@ -5,6 +5,8 @@ local fetcher = require "html-css.fetcher"
 local uv      = vim.uv
 local cwd     = uv.cwd()
 
+-- TODO
+-- if the file e.g index.css while in use was being deleted error occurred
 
 local html_css = {}
 
