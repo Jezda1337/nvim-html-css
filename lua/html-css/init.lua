@@ -1,38 +1,66 @@
-local M = {}
+local utils   = require "html-css.utils"
+local config  = require "html-css.config"
+local cache   = require "html-css.cache"
+local fetcher = require "html-css.fetcher"
+local uv      = vim.uv
+local cwd     = uv.cwd()
 
-local source = require("html-css.source")
-local externals = require("html-css.externals")
-local extractor = require("html-css.extractor")
-local ss = require("html-css.style_sheets")
-local internal = require("html-css.internal")
-local config = require("html-css.config").config
+-- TODO
+-- if the file e.g index.css while in use was being deleted error occurred
 
-local source_name = "html-css"
+local html_css = {}
 
----@type string[]
-local enable_on_dto = {}
+---@param opts Config
+html_css.setup = function(opts)
+	opts = vim.tbl_extend("force", config, opts)
 
-if config.enable_on ~= nil then
-  for _, ext in pairs(config.enable_on) do
-    table.insert(enable_on_dto, "*." .. ext)
-  end
-end
-
-function M:setup()
-	require("cmp").register_source(source_name, source)
-
-	if config.style_sheets ~= nil and #config.style_sheets ~= 0 then
-		ss.init(config.style_sheets)
+	vim.opt.ex = true
+	local project_config_path = cwd .. "/" .. ".nvim.lua"
+	if uv.fs_stat(project_config_path) then
+		dofile(project_config_path)
+		local project_config = vim.g.html_css or {}
+		opts = vim.tbl_deep_extend("force", opts, project_config)
 	end
 
-	vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre", "WinEnter" }, {
-		pattern = enable_on_dto,
-		callback = function(event)
-			local hrefs = extractor.href(config.style_sheets)
-			externals.init(event.buf, hrefs)
-			internal.init(event.buf, event.file)
-		end,
+	vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre" }, {
+		group = vim.api.nvim_create_augroup("html-css", { clear = true }),
+		pattern = vim.tbl_map(function(ext) return "*." .. ext end, opts.enable_on),
+		callback = function(args)
+			if utils.is_special_buffer(args.buf) then return end
+
+
+			local html_data = require "html-css.parsers.html".setup(args.buf)
+			local sources = vim.list_extend(html_data.cdn, opts.style_sheets)
+
+			if #html_data.raw_text > 0 then
+				local css_data = require "html-css.parsers.css".setup(html_data.raw_text)
+				cache:update("buffer://" .. args.file, css_data)
+				if #css_data.imports > 0 then
+					for _, imp in pairs(css_data.imports) do
+						table.insert(sources, imp)
+					end
+				end
+				table.insert(sources, "buffer://" .. args.file)
+			end
+
+			for _, src in pairs(sources) do
+				if src:match("buffer://") then goto continue end
+				fetcher:fetch(src, args.buf, opts.notify)
+				::continue::
+			end
+
+			cache:link_sources(args.buf, sources)
+		end
 	})
+
+	vim.api.nvim_create_autocmd("BufDelete", {
+		group = vim.api.nvim_create_augroup("html-css-cleanup", { clear = true }),
+		callback = function(args)
+			cache:cleanup(args.buf)
+		end
+	})
+
+	require "cmp".register_source("html-css", require "html-css.source":new(opts))
 end
 
-return M
+return html_css
