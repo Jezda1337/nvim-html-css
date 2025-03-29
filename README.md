@@ -10,6 +10,7 @@ CSS IntelliSense for HTML
 - Supports linked and inline stylesheets.  
 - Allows additional external stylesheets.  
 - Provides documentation for `class` and `id` attributes.  
+- Supports project-specific configurations via `.nvim.lua` files.
 
 ## ⚡️ Requirements  
 
@@ -68,7 +69,7 @@ If you're using `nvim-cmp`, add `html-css` as a source in your configuration:
 
 If you're using `blink.cmp`, you'll need the `blink.compat` plugin, which acts as a bridge between `nvim-cmp` and `blink.cmp`.  
 
-Here’s the default configuration from their wiki—you just need to add `html-css` to the sources:  
+Here's the default configuration from their wiki—you just need to add `html-css` to the sources:  
 
 ```lua
 {
@@ -121,10 +122,45 @@ Here’s the default configuration from their wiki—you just need to add `html-
 }
 ```
 
+## 🔧 Project-Specific Configuration
+
+You can set project-specific configurations using a `.nvim.lua` file in your project root. This allows you to have different settings for each project without modifying your global Neovim configuration.
+
+### Setup
+
+Create a `.nvim.lua` file in your project root directory and add the following:
+
+```lua
+-- Project-specific HTML/CSS configuration
+vim.g.nvim_html = {
+  enable_on = { "html", "jsx" },  -- File types for this project only
+  documentation = {
+    auto_show = true,
+  },
+  style_sheets = {
+    -- Project-specific stylesheets
+    "./src/styles/main.css",
+    "./src/styles/components.css",
+    "https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css",
+  }
+}
+```
+
+The plugin will automatically detect and apply these settings when working within this project. This is particularly useful for:
+
+- Adding project-specific stylesheets
+- Enabling the plugin for project-specific file types
+- Customizing documentation behavior for a specific project
+
+### Priority
+
+Project-specific configurations take precedence over global settings, allowing you to override any global configuration options on a per-project basis.
+
 ## 🤩 Pretty Menu Items  
 
 To display the file name and extension in the completion menu, modify the formatter like this:  
-### blink.cmp
+
+### nvim-cmp
 ```lua
 require("cmp").setup({
   formatting = {
@@ -166,7 +202,7 @@ require("cmp").setup({
                 {
                   pattern = "bootstrap",
                   label = "[Bootstrap]",
-                  icon = " "
+                  icon = " "
                 },
                 {
                   pattern = "foundation",
