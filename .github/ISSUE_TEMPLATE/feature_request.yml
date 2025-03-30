@@ -1,0 +1,47 @@
+name: Feature Request
+description: Suggest a new feature or improvement
+title: "feat: "
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for your suggestion! Please fill out the details below to help us understand your request.
+  
+  - type: input
+    attributes:
+      label: "Neovim version (nvim -v)"
+      placeholder: "0.9.4 commit 1a6ffc6"
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Feature Description
+      description: Describe the feature or improvement you'd like to see.
+      placeholder: "It would be great if..."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Use Case / Motivation
+      description: Explain why this feature would be useful.
+      placeholder: "This would help because..."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: Alternatives
+      description: Have you considered any alternative solutions?
+      placeholder: "A possible workaround is..."
+    validations:
+      required: false
+
+  - type: textarea
+    attributes:
+      label: Additional Information
+      description: Any other context, screenshots, or links to relevant discussions.
+    validations:
+      required: false

@@ -1,0 +1,56 @@
+name: Bug Report
+description: File a bug/issue
+title: "bug: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please provide all the information requested to help us resolve your issue efficiently.
+  - type: input
+    attributes:
+      label: "Neovim version (nvim -v)"
+      placeholder: "0.9.4 commit 1a6ffc6"
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Error Message
+      description: Paste the full error message or traceback here.
+      placeholder: "Error message..."
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps To Reproduce
+      description: Clear steps to reproduce the behavior.
+      placeholder: |
+        1. 
+        2. 
+        3.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Minimal Configuration
+      description: Provide a minimal Neovim config that reproduces the issue.
+      value: |
+        -- Paste your minimal init.lua or init.vim here
+        -- Only include what's necessary to reproduce the issue
+      render: lua
+    validations:
+      required: true
+  - type: checkboxes
+    attributes:
+      label: Related Plugins
+      description: Which completion plugins are you using?
+      options:
+        - label: nvim-cmp
+        - label: blink.cmp
+        - label: Other (please specify in Additional Information)
+  - type: textarea
+    attributes:
+      label: Additional Information
+      description: Any other context or screenshots that might help us understand the issue.
+    validations:
+      required: false
