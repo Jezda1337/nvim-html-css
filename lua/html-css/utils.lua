@@ -9,16 +9,18 @@ end
 ---@param path string
 ---@param cb function
 utils.read_file = function(path, cb)
+    print(path)
 	-- TODO this needs more work, the point is to allow deep nested components to find theirs styles
     -- potential solution is the current file location + the path
-	if path:start_with("./") then
-		path = path:gsub("./", "/")
-		path = vim.fn.expand("%:p:h") .. path
-	end
-	if path:start_with("/public") then
-		path = vim.fn.expand("%:p:h") .. path
-	end
-	uv.fs_open(path, "r", 438, function(err, fd)
+	-- if path:start_with("./") then
+	-- 	path = path:gsub("./", "/")
+	-- 	path = vim.fn.expand("%:p:h") .. path
+	-- end
+	-- if path:start_with("/public") then
+	-- 	path = vim.fn.expand("%:p:h") .. path
+	-- end
+
+	uv.fs_open(vim.fn.expand("%:p:h") .. path, "r", 438, function(err, fd)
 		assert(not err, err)
 		uv.fs_fstat(fd, function(err, stat)
 			assert(not err, err)
