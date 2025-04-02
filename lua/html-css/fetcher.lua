@@ -42,15 +42,13 @@ end
 ---@param bufnr integer
 ---@param notify boolean
 function fetcher:_fetch_local(source, bufnr, notify)
-	local resolved = utils.resolve_path(source)
-
 	if notify then
 		vim.schedule(function()
-			vim.notify("PARSED: " .. resolved, vim.log.levels.INFO)
+			vim.notify("PARSED: " .. source, vim.log.levels.INFO)
 		end)
 	end
 
-	utils.read_file(resolved, function(out)
+	utils.read_file(source, function(out)
 		local css_data = require "html-css.parsers.css".setup(out)
 		cache:update(source, css_data)
 		if #css_data.imports > 0 then

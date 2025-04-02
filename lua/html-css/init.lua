@@ -43,6 +43,18 @@ html_css.setup = function(opts)
                 table.insert(sources, "buffer://" .. args.file)
             end
 
+
+            -- normalize and proper formatting the paths of the local linked files
+            for i, src in ipairs(sources) do
+                if utils.is_local(src) then
+                    if src:match("^/") then
+                        sources[i] = vim.fs.normalize(vim.uv.cwd() .. "/" .. src)
+                    else
+                        sources[i] = vim.fs.normalize(vim.fn.expand("%:p:h") .. "/" .. src)
+                    end
+                end
+            end
+
             for _, src in pairs(sources) do
                 if src:match("buffer://") then goto continue end
                 fetcher:fetch(src, args.buf, opts.notify)
