@@ -60,6 +60,7 @@ function cache:update(source, data)
 	end
 
 	insert_items(data.class, self._sources[resolved].classes)
+	insert_items(data.id, self._sources[resolved].ids)
 
 	for _, imp in pairs(data.imports) do
 		local resolved_imp = utils.resolve_path(imp)
