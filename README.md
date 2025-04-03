@@ -132,7 +132,7 @@ Create a `.nvim.lua` file in your project root directory and add the following:
 
 ```lua
 -- Project-specific HTML/CSS configuration
-vim.g.nvim_html = {
+vim.g.html_css = {
   enable_on = { "html", "jsx" },  -- File types for this project only
   documentation = {
     auto_show = true,
