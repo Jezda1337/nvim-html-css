@@ -27,14 +27,20 @@ css.query = [[
 ((stylesheet
    (import_statement
 	 (string_value
-		(string_content) @value))))
+		(string_content) @value)
+        (#not-lua-match? @value "^tailwind")
+        (#not-lua-match? @value "^tw%-")
+)))
 ((stylesheet
    (import_statement
 	 (call_expression
 	   (function_name)
 	   (arguments
 		 (string_value
-			(string_content)@value))))))
+			(string_content)@value)
+        (#not-lua-match? @value "^tailwind")
+        (#not-lua-match? @value "^tw%-")
+)))))
 ]]
 
 ---@param stdout string
