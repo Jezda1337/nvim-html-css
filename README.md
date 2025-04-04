@@ -11,6 +11,7 @@ CSS IntelliSense for HTML
 - Allows additional external stylesheets.  
 - Provides documentation for `class` and `id` attributes.  
 - Supports project-specific configurations via `.nvim.lua` files.
+- Go to definition.
 
 ## ⚡️ Requirements  
 
@@ -44,6 +45,11 @@ CSS IntelliSense for HTML
       "php",
       "templ",
       "astro",
+    },
+    handlers = {
+      definition = {
+        bind = "gs"
+      },
     },
     documentation = {
       auto_show = true,
@@ -115,6 +121,11 @@ Here's the default configuration from their wiki—you just need to add `html-cs
 ```lua
 {
   enable_on = { "html" },
+  handlers = {
+    definition = {
+      bind = "gs"
+    },
+  },
   documentation = {
     auto_show = true,
   },
@@ -134,6 +145,11 @@ Create a `.nvim.lua` file in your project root directory and add the following:
 -- Project-specific HTML/CSS configuration
 vim.g.html_css = {
   enable_on = { "html", "jsx" },  -- File types for this project only
+  handlers = {
+    definition = {
+      bind = "gs"
+    },
+  },
   documentation = {
     auto_show = true,
   },
@@ -228,3 +244,6 @@ require("cmp").setup({
   }
 }
 ```
+
+### Go to Definition
+The default key binding for Go to Definition functionality is set to "gs". If a class or ID is not found, it automatically falls back to the LSP definition using vim.lsp.buf.definition(). This allows for seamless navigation between your custom HTML/CSS definitions and LSP-managed definitions.

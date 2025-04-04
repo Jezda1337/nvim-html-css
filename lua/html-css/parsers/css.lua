@@ -44,42 +44,52 @@ css.query = [[
 ]]
 
 ---@param stdout string
+---@param withLocation boolean Flag for ignoring remote styles
 ---@return CSS_Data
-css.setup = function(stdout)
-	local root, query = utils.string_parse(css.lang, css.query, stdout)
-	---@type CSS_Data
-	local css_data = {
-		imports = {},
-		class = {},
-		id = {},
-	}
+css.setup = function(stdout, withLocation)
+    local root, query = utils.string_parse(css.lang, css.query, stdout)
+    ---@type CSS_Data
+    local css_data = {
+        imports = {},
+        class = {},
+        id = {},
+    }
 
-	for _, match, _ in query:iter_matches(root, stdout, 0, -1, { all = true }) do
-		for id, nodes in pairs(match) do
-			local name = query.captures[id]
-			for _, node in ipairs(nodes) do
-				if name == "class_name" then
-					table.insert(css_data.class, {
-						label = ts.get_node_text(node, stdout),
-						block = ts.get_node_text(match[3][1], stdout),
-						kind = 13,
-					})
-				end
-				if name == "id_name" then
-					table.insert(css_data.id, {
-						label = ts.get_node_text(node, stdout),
-						block = ts.get_node_text(match[6][1], stdout),
-						kind = 13,
-					})
-				end
-				if name == "value" then
-					table.insert(css_data.imports, ts.get_node_text(node, stdout))
-				end
-			end
-		end
-	end
+    for _, match, _ in query:iter_matches(root, stdout, 0, -1, { all = true }) do
+        for id, nodes in pairs(match) do
+            local name = query.captures[id]
+            for _, node in ipairs(nodes) do
+                local start_row, start_col, end_row, end_col = node:range()
+                if name == "class_name" then
+                    table.insert(css_data.class, {
+                        label = ts.get_node_text(node, stdout),
+                        block = ts.get_node_text(match[3][1], stdout),
+                        kind = 13,
+                        range = withLocation and {
+                            start = { line = start_row, character = start_col },
+                            ["end"] = { line = end_row, character = end_col }
+                        } or nil
+                    })
+                end
+                if name == "id_name" then
+                    table.insert(css_data.id, {
+                        label = ts.get_node_text(node, stdout),
+                        block = ts.get_node_text(match[6][1], stdout),
+                        kind = 13,
+                        range = withLocation and {
+                            start = { line = start_row, character = start_col },
+                            ["end"] = { line = end_row, character = end_col }
+                        } or nil
+                    })
+                end
+                if name == "value" then
+                    table.insert(css_data.imports, ts.get_node_text(node, stdout))
+                end
+            end
+        end
+    end
 
-	return css_data
+    return css_data
 end
 
 return css

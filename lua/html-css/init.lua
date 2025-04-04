@@ -33,7 +33,7 @@ html_css.setup = function(opts)
             local sources = vim.list_extend(html_data.cdn, opts.style_sheets)
 
             if #html_data.raw_text > 0 then
-                local css_data = require "html-css.parsers.css".setup(html_data.raw_text)
+                local css_data = require "html-css.parsers.css".setup(html_data.raw_text, true)
                 cache:update("buffer://" .. args.file, css_data)
                 if #css_data.imports > 0 then
                     for _, imp in pairs(css_data.imports) do
@@ -72,6 +72,7 @@ html_css.setup = function(opts)
         end
     })
 
+    require "html-css.definition".setup(opts.handlers.definition)
     require "cmp".register_source("html-css", require "html-css.source":new(opts))
 end
 
