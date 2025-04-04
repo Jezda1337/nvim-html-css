@@ -72,7 +72,10 @@ html_css.setup = function(opts)
         end
     })
 
+    -- Handlers
     require "html-css.definition".setup(opts.handlers.definition)
+    require "html-css.hover".setup(opts.handlers.hover)
+
     require "cmp".register_source("html-css", require "html-css.source":new(opts))
 end
 

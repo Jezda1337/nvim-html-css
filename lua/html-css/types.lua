@@ -26,9 +26,16 @@
 
 ---@class Handlers
 ---@field definition Definition
+---@field hover Hover
 
 ---@class Definition
 ---@field bind string
+
+---@class Hover
+---@field bind string
+---@field wrap boolean
+---@field border string
+---@field position string
 
 ---@class Range
 ---@field start { line: integer, character: integer }

@@ -3,6 +3,12 @@ return {
     handlers = {
         definition = {
             bind = "gd"
+        },
+        hover = {
+            bind = "K",
+            wrap = true,
+            border = "rounded",
+            position = "cursor",
         }
     },
     notify = false, -- for debugging only

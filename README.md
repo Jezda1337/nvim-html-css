@@ -12,6 +12,7 @@ CSS IntelliSense for HTML
 - Provides documentation for `class` and `id` attributes.  
 - Supports project-specific configurations via `.nvim.lua` files.
 - Go to definition.
+- Hover
 
 ## ⚡️ Requirements  
 
@@ -49,6 +50,12 @@ CSS IntelliSense for HTML
     handlers = {
       definition = {
         bind = "gd"
+      },
+      hover = {
+        bind = "K",
+        wrap = true,
+        border = "none",
+        position = "cursor",
       },
     },
     documentation = {
@@ -125,6 +132,12 @@ Here's the default configuration from their wiki—you just need to add `html-cs
     definition = {
       bind = "gd"
     },
+    hover = {
+      bind = "K",
+      wrap = true,
+      border = "none",
+      position = "cursor",
+    }
   },
   documentation = {
     auto_show = true,
@@ -149,6 +162,12 @@ vim.g.html_css = {
     definition = {
       bind = "gd"
     },
+    hover = {
+      bind = "K",
+      wrap = true,
+      border = "none",
+      position = "cursor",
+    }
   },
   documentation = {
     auto_show = true,
@@ -247,3 +266,6 @@ require("cmp").setup({
 
 ### Go to Definition
 The default key binding for Go to Definition functionality is set to `gd`. If a class or ID is not found, it automatically falls back to the LSP definition using vim.lsp.buf.definition(). This allows for seamless navigation between your custom HTML/CSS definitions and LSP-managed definitions.
+
+### Hover functionality
+The default key binding for the hover functionality is set to `K`. If a class or ID is not found, it automatically falls back to the LSP hover using vim.lsp.buf.hover(). This enables quick access to your custom HTML/CSS definitions alongside standard LSP information for a seamless development experience.
