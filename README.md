@@ -48,7 +48,7 @@ CSS IntelliSense for HTML
     },
     handlers = {
       definition = {
-        bind = "gs"
+        bind = "gd"
       },
     },
     documentation = {
@@ -123,7 +123,7 @@ Here's the default configuration from their wiki—you just need to add `html-cs
   enable_on = { "html" },
   handlers = {
     definition = {
-      bind = "gs"
+      bind = "gd"
     },
   },
   documentation = {
@@ -147,7 +147,7 @@ vim.g.html_css = {
   enable_on = { "html", "jsx" },  -- File types for this project only
   handlers = {
     definition = {
-      bind = "gs"
+      bind = "gd"
     },
   },
   documentation = {
@@ -246,4 +246,4 @@ require("cmp").setup({
 ```
 
 ### Go to Definition
-The default key binding for Go to Definition functionality is set to "gs". If a class or ID is not found, it automatically falls back to the LSP definition using vim.lsp.buf.definition(). This allows for seamless navigation between your custom HTML/CSS definitions and LSP-managed definitions.
+The default key binding for Go to Definition functionality is set to `gd`. If a class or ID is not found, it automatically falls back to the LSP definition using vim.lsp.buf.definition(). This allows for seamless navigation between your custom HTML/CSS definitions and LSP-managed definitions.

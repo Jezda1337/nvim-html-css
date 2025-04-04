@@ -2,7 +2,7 @@ return {
     enable_on = { "html" },
     handlers = {
         definition = {
-            bind = "gs"
+            bind = "gd"
         }
     },
     notify = false, -- for debugging only

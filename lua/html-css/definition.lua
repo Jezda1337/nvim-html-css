@@ -3,8 +3,8 @@ local ts = vim.treesitter
 
 local definition = {}
 
----@param word string
 ---@return boolean
+---@param word string
 local function get_selector(word)
     local node = ts.get_node()
     local bufnr = vim.api.nvim_get_current_buf()
