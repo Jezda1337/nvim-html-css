@@ -14,6 +14,10 @@ local html_css = {}
 html_css.setup = function(opts)
     opts = vim.tbl_extend("force", config, opts)
 
+    -- manually load everything from plugin runtime
+    -- this was the solution for the #44
+    vim.cmd("runtime! plugin/**/*.{vim,lua}")
+
     vim.opt.ex = true
     local project_config_path = cwd .. "/" .. ".nvim.lua"
     if uv.fs_stat(project_config_path) then
