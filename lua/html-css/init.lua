@@ -49,10 +49,13 @@ html_css.setup = function(opts)
 
 
             -- normalize and proper formatting the paths of the local linked files
+            -- TODO needs cleanup it become a mess
             for i, src in ipairs(sources) do
                 if utils.is_local(src) then
                     if src:match("^/") then
                         sources[i] = vim.fs.normalize(vim.uv.cwd() .. "/" .. src)
+                    elseif src:match("^buffer://") then
+                        sources[i] = src
                     else
                         sources[i] = vim.fs.normalize(vim.fn.expand("%:p:h") .. "/" .. src)
                     end
