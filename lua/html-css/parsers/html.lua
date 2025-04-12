@@ -3,10 +3,11 @@ local ts    = vim.treesitter
 
 local html  = {}
 
---
+-- -------------------------------------------------------------------------------------
 -- FIXME part with the queries needs cleanup and better handling more languages (currently test with jsx/tsx/html/vue/astro)
 -- only for tsx and jsx cannot be used html parser :/
---
+-- FIXME the parser needs major refactoring
+-- -------------------------------------------------------------------------------------
 
 html.lang   = "html" -- this is no longer need since it must look for current language form the buffer
 
@@ -38,6 +39,7 @@ html.setup  = function(bufnr)
         html.query = html.tsx -- Use TSX-specific query for TSX and JavaScript
     else
         html.query = html.html -- Default to HTML query (this is used by astro/vue/html/svelte) and others
+        html.lang = "html" -- Default to HTML language to be able to use query
     end
     -- -------------------------------------------------------------------------------------
 
