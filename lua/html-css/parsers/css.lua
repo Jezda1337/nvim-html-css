@@ -27,7 +27,7 @@ css.query = [[
 ((stylesheet
    (import_statement
 	 (string_value
-		(string_content) @value)
+		(_) @value)
         (#not-lua-match? @value "^tailwind")
         (#not-lua-match? @value "^tw%-")
 )))
@@ -37,7 +37,7 @@ css.query = [[
 	   (function_name)
 	   (arguments
 		 (string_value
-			(string_content)@value)
+			(_)@value)
         (#not-lua-match? @value "^tailwind")
         (#not-lua-match? @value "^tw%-")
 )))))
