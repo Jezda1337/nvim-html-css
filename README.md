@@ -6,18 +6,40 @@ CSS IntelliSense for HTML
 
 ## ✨ Features  
 
-- Autocompletion for `id` and `class` attributes in HTML.  
-- Supports linked and inline stylesheets.  
-- Allows additional external stylesheets.  
-- Provides documentation for `class` and `id` attributes.  
+- Autocompletion for `id` and `class` attributes in HTML.
+- Automatic detection of linked (`<link>`) and inline (`<style>`) stylesheets within the currently active HTML/component file.
+- Allows explicit configuration of additional project-wide or external stylesheets (e.g., global styles, CSS frameworks not directly linked in the current file).
+- Provides documentation for `class` and `id` attributes.
 - Supports project-specific configurations via `.nvim.lua` files.
 - Go to definition.
-- Hover
+- Hover.
 
 ## ⚡️ Requirements  
 
 - Neovim 0.10+  
 - curl 8.7+  
+
+## 💡 How Style Discovery Works
+
+1. This plugin provides CSS IntelliSense by understanding the styles applicable to your current buffer (the file you are editing). It discovers styles in two main ways:
+    - Buffer-Specific Automatic Detection:
+        - When you open an HTML or component file (e.g., `index.html`, `MyComponent.jsx`), the plugin automatically parses it for:
+            - Linked stylesheets: Any `<link rel="stylesheet" href="...">` tags, whether they point to local files (e.g., `./style.css`) or remote URLs (e.g., a CDN link).
+            - Inline styles: Any CSS rules defined within `<style>...</style>` tags directly in the file.
+        - Completions from these automatically detected styles are available only for the specific file where they are linked or embedded.
+
+2. Explicit Configuration for Global/Project-Wide Styles (`style_sheets` option):
+    - Many modern web projects (e.g., using React, Vue, Svelte, Angular, or with build tools like Vite, Webpack) have global stylesheets that are bundled and apply to the entire application, even if not explicitly linked in every single component file.
+    - For these scenarios, you need to inform the plugin about these stylesheets using the `style_sheets` array in your configuration (either globally in your Neovim setup or via a project-specific `.nvim.lua`).
+    - When to use style_sheets:
+        - You have a global `main.css`, `theme.css`, or similar that applies to your whole project.
+        - You are using a CSS framework like Tailwind CSS, Bootstrap, Bulma, etc., and these styles are imported/included at a project level (e.g., in your main JavaScript entry file) rather than linked in each individual HTML/component.
+        - Your styles are processed by a bundler and you want completions from the source CSS files before they are bundled.
+    - The plugin will then parse these configured stylesheets and make their `id` and `class` definitions available for autocompletion across all relevant file types enabled in `enable_on`.
+
+In essence:
+- For styles directly linked or embedded in the file you're editing, the plugin works automatically for that file.
+- For styles that are part of your project but not directly linked in the current file (like global stylesheets or framework CSS bundled elsewhere), you must list them in the `style_sheets` configuration option for the plugin to find them.
 
 ## 📦 Installation  
 
