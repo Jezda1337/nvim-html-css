@@ -62,6 +62,7 @@ css.setup = function(stdout, withLocation)
                 local start_row, start_col, end_row, end_col = node:range()
                 if name == "class_name" then
                     table.insert(css_data.class, {
+                        type = "class",
                         label = ts.get_node_text(node, stdout),
                         block = ts.get_node_text(match[3][1], stdout),
                         kind = 13,
@@ -73,6 +74,7 @@ css.setup = function(stdout, withLocation)
                 end
                 if name == "id_name" then
                     table.insert(css_data.id, {
+                        type = "id",
                         label = ts.get_node_text(node, stdout),
                         block = ts.get_node_text(match[6][1], stdout),
                         kind = 13,
