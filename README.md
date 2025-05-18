@@ -11,8 +11,9 @@ CSS IntelliSense for HTML
 - Allows explicit configuration of additional project-wide or external stylesheets (e.g., global styles, CSS frameworks not directly linked in the current file).
 - Provides documentation for `class` and `id` attributes.
 - Supports project-specific configurations via `.nvim.lua` files.
-- Go to definition.
+- Go to definition. 
 - Hover.
+(You need to have at least one LSP attached to the buffer for hover and go to definition features to work)
 
 ## ⚡️ Requirements  
 
