@@ -90,6 +90,8 @@ function hover.setup(opts)
     vim.keymap.set("n", opts.bind, function()
         local word = vim.fn.expand("<cword>")
         if not get_block(word, opts) then
+            -- TODO FIXME - if current buffer doesn't have any lsp attached then we are fckt
+            -- i need to find out a fallback
             vim.lsp.buf.hover()
         end
     end, { noremap = true, silent = true })

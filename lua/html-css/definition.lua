@@ -58,6 +58,8 @@ function definition.setup(opts)
 
         -- if not found selector fall back to the default lps definition
         if not get_selector(word) then
+            -- TODO FIXME - if current buffer doesn't have any lsp attached then we are fckt
+            -- i need to find out a fallback
             vim.lsp.buf.definition()
         end
     end, { noremap = true, silent = true })
