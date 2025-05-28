@@ -12,6 +12,7 @@ end
 ---@param cb function
 utils.read_file = function(path, cb)
     uv.fs_open(path, "r", 438, function(err, fd)
+        if err ~= nil then return end
         assert(not err, err)
         uv.fs_fstat(fd, function(err, stat)
             assert(not err, err)
