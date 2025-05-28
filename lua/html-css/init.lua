@@ -36,6 +36,8 @@ html_css.setup = function(opts)
             local html_data = require "html-css.parsers.html".setup(args.buf)
             local sources = vim.list_extend(html_data.cdn, opts.style_sheets)
 
+            if #sources <= 0 then return end
+
             if #html_data.raw_text > 0 then
                 local css_data = require "html-css.parsers.css".setup(html_data.raw_text, true)
                 cache:update("buffer://" .. args.file, css_data)
