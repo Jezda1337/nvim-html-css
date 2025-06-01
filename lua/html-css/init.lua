@@ -81,6 +81,8 @@ html_css.setup = function(opts)
         end
     })
 
+    require "html-css.lsp".setup(opts)
+
     -- Handlers
     require "html-css.definition".setup(opts.handlers.definition)
     require "html-css.hover".setup(opts.handlers.hover)
