@@ -47,7 +47,7 @@ local function create_server(dispatchers)
             end
 
             local context = nil
-            local node = vim.treesitter.get_node({ bufnr = bufnr, pos = { position.line, position.character } })
+            local node = vim.treesitter.get_node({ lang = "html", pos = { position.line, position.character } })
 
             while node do
                 if node:type() == "attribute" or node:type() == "jsx_attribute" then
@@ -152,38 +152,28 @@ local function create_server(dispatchers)
     return srv
 end
 
-LSP.setup = function(opts)
-    opts = opts or {}
+LSP.create_client = function(opts, bufnr)
+    -- Check for any existing clients with this name globally
+    local clients = vim.lsp.get_clients({ name = "html-css-lsp" })
+    if #clients > 0 then
+        -- Client exists, just attach it to this buffer
+        vim.lsp.buf_attach_client(bufnr, clients[1].id)
+        return
+    end
 
-    if not opts.lsp or not opts.lsp.enable then return end
-
-    local filetypes = opts.enable_on or {}
-
-    vim.api.nvim_create_autocmd("FileType", {
-        pattern = filetypes,
-        callback = function(args)
-            local clients = vim.lsp.get_clients({ buf = args.buf, name = "html-css-lsp" })
-            if #clients > 0 then
-                return -- already created
-            end
-
-            local client_id = vim.lsp.start({
-                name = "html-css-lsp",
-                cmd = function(dispatchers)
-                    local srv = create_server(dispatchers)
-                    srv.set_opts(opts)
-                    return srv
-                end,
-                root_dir = vim.fs.dirname(vim.fs.find({ ".git", "package.json", ".nvim.lua" }, { upward = true })[1]) or
-                    vim.fn.getcwd()
-            })
-
-            if client_id then
-                vim.lsp.buf_attach_client(args.buf, client_id)
-            end
-        end
+    local client_id = vim.lsp.start({
+        name = "html-css-lsp",
+        cmd = function(dispatchers)
+            local srv = create_server(dispatchers)
+            srv.set_opts(opts)
+            return srv
+        end,
+        root_dir = vim.fs.dirname(vim.fs.find({ ".git", "package.json", ".nvim.lua" }, { upward = true })[1]) or
+            vim.fn.getcwd()
     })
+    if client_id then
+        vim.lsp.buf_attach_client(bufnr, client_id)
+    end
 end
-
 
 return LSP
