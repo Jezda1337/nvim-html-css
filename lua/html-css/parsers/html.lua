@@ -36,10 +36,10 @@ html.setup  = function(bufnr)
     html.lang = lang
 
     if lang == "tsx" or lang == "javascript" then
-        html.query = html.tsx -- Use TSX-specific query for TSX and JavaScript
+        html.query = html.tsx  -- Use TSX-specific query for TSX and JavaScript
     else
         html.query = html.html -- Default to HTML query (this is used by astro/vue/html/svelte) and others
-        html.lang = "html" -- Default to HTML language to be able to use query
+        html.lang = "html"     -- Default to HTML language to be able to use query
     end
     -- -------------------------------------------------------------------------------------
 
