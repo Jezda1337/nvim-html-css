@@ -32,6 +32,9 @@ html_css.setup = function(opts)
         callback = function(args)
             if utils.is_special_buffer(args.buf) then return end
 
+            if opts.lsp.enable then
+                require("html-css.lsp").create_client(opts, args.buf)
+            end
 
             local html_data = require "html-css.parsers.html".setup(args.buf)
             local sources = vim.list_extend(html_data.cdn, opts.style_sheets)
@@ -81,15 +84,19 @@ html_css.setup = function(opts)
         end
     })
 
-    require "html-css.lsp".setup(opts)
+    -- if opts.lsp.enable then
+    --     require "html-css.lsp".setup(opts)
+    -- end
 
     -- Handlers
     require "html-css.definition".setup(opts.handlers.definition)
     require "html-css.hover".setup(opts.handlers.hover)
 
-    local ok, cmp = pcall(require, "cmp")
-    if ok then
-        cmp.register_source("html-css", require "html-css.source":new(opts))
+    if not opts.lsp.enable then
+        local ok, cmp = pcall(require, "cmp")
+        if ok then
+            cmp.register_source("html-css", require "html-css.source":new(opts))
+        end
     end
 end
 
