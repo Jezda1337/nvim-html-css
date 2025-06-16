@@ -30,7 +30,7 @@ function source:is_available()
     -- but for embeddable like PHP or HTMLDJANGO we have to use HTML
     local isJSX = ext == "jsx"
     local isTSX = ext == "tsx"
-    local lang = isJSX and "javascript" or isTSX and "jsx" or "html"
+    local lang = isJSX and "javascript" or isTSX and "tsx" or "html"
 
     local node = vim.treesitter.get_node({ lang = lang })
     self.context = nil
