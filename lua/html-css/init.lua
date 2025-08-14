@@ -52,27 +52,38 @@ html_css.setup = function(opts)
                 table.insert(sources, "buffer://" .. args.file)
             end
 
-
             -- normalize and proper formatting the paths of the local linked files
-            -- TODO needs cleanup it become a mess
             for i, src in ipairs(sources) do
                 if utils.is_local(src) then
                     if src:match("^/") then
-                        sources[i] = vim.fs.normalize(vim.uv.cwd() .. "/" .. src)
+                        sources[i] = vim.fs.normalize(cwd .. "/" .. src)
                     elseif src:match("^buffer://") then
                         sources[i] = src
                     else
-                        sources[i] = vim.fs.normalize(vim.fn.expand("%:p:h") .. "/" .. src)
+                        -- Check if this source comes from user configuration (opts.style_sheets)
+                        local is_from_config = false
+                        for _, config_src in ipairs(opts.style_sheets) do
+                            if config_src == src then
+                                is_from_config = true
+                                break
+                            end
+                        end
+
+                        if is_from_config then
+                            -- Resolve relative to project root (cwd)
+                            sources[i] = vim.fs.normalize(cwd .. "/" .. src)
+                        else
+                            -- Resolve relative to current file (for HTML imports)
+                            sources[i] = vim.fs.normalize(vim.fn.expand("%:p:h") .. "/" .. src)
+                        end
                     end
                 end
             end
-
             for _, src in pairs(sources) do
                 if src:match("buffer://") then goto continue end
                 fetcher:fetch(src, args.buf, opts.notify)
                 ::continue::
             end
-
             cache:link_sources(args.buf, sources)
         end
     })
