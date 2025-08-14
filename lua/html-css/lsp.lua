@@ -113,7 +113,9 @@ local function create_server(dispatchers)
                 })
             end
 
-            callback(nil, { items = completion_items })
+            vim.schedule(function()
+                callback(nil, { items = completion_items })
+            end)
         elseif method == "textDocument/hover" then
             if opts.handlers and opts.handlers.definition then
                 callback(nil, nil)
