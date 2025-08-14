@@ -20,7 +20,7 @@ local function create_server(dispatchers)
                     },
                     completionProvider = {
                         triggerCharacters = { '"', "'", " " },
-                        resolveProvider = false
+                        resolveProvider = true
                     },
                     hoverProvider = true,
                     definitionProvder = true
@@ -124,6 +124,8 @@ local function create_server(dispatchers)
             end
         elseif method == "shutdown" then
             callback(nil, nil)
+        elseif method == "completionItem/resolve" then
+            callback(nil, params)
         else
             callback({ code = -32601, message = "Method not found" }, nil)
         end
