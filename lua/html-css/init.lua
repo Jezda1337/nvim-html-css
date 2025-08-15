@@ -51,10 +51,27 @@ html_css.setup = function(opts)
             -- normalize and proper formatting the paths of the local linked files
             for i, src in ipairs(sources) do
                 if utils.is_local(src) then
+                    local resolved
+
                     if src:match("^/") then
-                        sources[i] = vim.fs.normalize(cwd .. "/" .. src)
+                        -- remove starting slash for joining
+                        local relative_path = src:gsub("^/", "")
+                        local candidate_paths = {
+                            -- TODO - make public/static configurable, include table with values so client can use what ever static folder he wants
+                            vim.fs.joinpath(cwd, relative_path),
+                            vim.fs.joinpath(cwd, "public", relative_path),
+                            vim.fs.joinpath(cwd, "static", relative_path),
+                        }
+                        for _, p in ipairs(candidate_paths) do
+                            if utils.file_exists(p) then
+                                resolved = p
+                                break
+                            end
+                        end
+
                     elseif src:match("^buffer://") then
-                        sources[i] = src
+                        resolved = src
+
                     else
                         -- Check if this source comes from user configuration (opts.style_sheets)
                         local is_from_config = false
@@ -65,13 +82,28 @@ html_css.setup = function(opts)
                             end
                         end
 
+                        local base_dir
                         if is_from_config then
-                            -- Resolve relative to project root (cwd)
-                            sources[i] = vim.fs.normalize(cwd .. "/" .. src)
+                            base_dir = cwd
                         else
-                            -- Resolve relative to current file (for HTML imports)
-                            sources[i] = vim.fs.normalize(vim.fn.expand("%:p:h") .. "/" .. src)
+                            base_dir = vim.fn.expand("%:p:h")
                         end
+
+                        local candidate_paths = {
+                            vim.fs.joinpath(base_dir, src),
+                            vim.fs.joinpath(cwd, "public", src),
+                            vim.fs.joinpath(cwd, "static", src),
+                        }
+                        for _, p in ipairs(candidate_paths) do
+                            if utils.file_exists(p) then
+                                resolved = p
+                                break
+                            end
+                        end
+                    end
+
+                    if resolved then
+                        sources[i] = vim.fs.normalize(resolved)
                     end
                 end
             end

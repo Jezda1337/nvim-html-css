@@ -8,6 +8,16 @@ string.start_with = function(self, str)
     return self:sub(1, #str) == str
 end
 
+
+---@param path string
+---@return boolean
+utils.file_exists = function(path)
+    if vim.fn.filereadable(path) == 1 then
+        return true
+    end
+    return false
+end
+
 ---@param path string
 ---@param cb function
 utils.read_file = function(path, cb)
