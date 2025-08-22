@@ -48,62 +48,24 @@ html_css.setup = function(opts)
                 table.insert(sources, "buffer://" .. args.file)
             end
 
-            -- normalize and proper formatting the paths of the local linked files
+            -- normalize and properly format the paths of local linked files
             for i, src in ipairs(sources) do
                 if utils.is_local(src) then
-                    local resolved
-
-                    if src:match("^/") then
-                        -- remove starting slash for joining
-                        local relative_path = src:gsub("^/", "")
-                        local candidate_paths = {
-                            -- TODO - make public/static configurable, include table with values so client can use what ever static folder he wants
-                            vim.fs.joinpath(cwd, relative_path),
-                            vim.fs.joinpath(cwd, "public", relative_path),
-                            vim.fs.joinpath(cwd, "static", relative_path),
-                        }
-                        for _, p in ipairs(candidate_paths) do
-                            if utils.file_exists(p) then
-                                resolved = p
-                                break
-                            end
-                        end
-
-                    elseif src:match("^buffer://") then
-                        resolved = src
-
-                    else
-                        -- Check if this source comes from user configuration (opts.style_sheets)
-                        local is_from_config = false
-                        for _, config_src in ipairs(opts.style_sheets) do
-                            if config_src == src then
-                                is_from_config = true
-                                break
-                            end
-                        end
-
-                        local base_dir
-                        if is_from_config then
-                            base_dir = cwd
-                        else
-                            base_dir = vim.fn.expand("%:p:h")
-                        end
-
-                        local candidate_paths = {
-                            vim.fs.joinpath(base_dir, src),
-                            vim.fs.joinpath(cwd, "public", src),
-                            vim.fs.joinpath(cwd, "static", src),
-                        }
-                        for _, p in ipairs(candidate_paths) do
-                            if utils.file_exists(p) then
-                                resolved = p
-                                break
-                            end
+                    -- Check if this source comes from user configuration (opts.style_sheets)
+                    local is_from_config = false
+                    for _, config_src in ipairs(opts.style_sheets) do
+                        if config_src == src then
+                            is_from_config = true
+                            break
                         end
                     end
 
+                    -- base_dir is cwd for config, otherwise current file’s folder
+                    local base_dir = is_from_config and cwd or vim.fn.expand("%:p:h")
+
+                    local resolved = utils.resolve_path(src, base_dir)
                     if resolved then
-                        sources[i] = vim.fs.normalize(resolved)
+                        sources[i] = resolved
                     end
                 end
             end
