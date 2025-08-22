@@ -51,8 +51,10 @@ function fetcher:_fetch_local(source, bufnr, notify)
     utils.read_file(source, function(out)
         local css_data = require "html-css.parsers.css".setup(out, true)
         cache:update(source, css_data)
+
         if #css_data.imports > 0 then
-            self:_process_imports(css_data.imports, bufnr, notify)
+            local base_dir = vim.fn.fnamemodify(source, ":h")
+            self:_process_imports(css_data.imports, bufnr, notify, base_dir)
         end
     end)
 end
@@ -60,13 +62,13 @@ end
 ---@param imports table<string>
 ---@param bufnr integer
 ---@param notify boolean
-function fetcher:_process_imports(imports, bufnr, notify)
+function fetcher:_process_imports(imports, bufnr, notify, base_dir)
     local sources = {}
 
     for _, imp in pairs(imports) do
-        local resolved = utils.resolve_path(imp)
+        local resolved = utils.resolve_path(imp, base_dir)
         if resolved then
-            table.insert(sources, imp)
+            table.insert(sources, resolved)
             self:fetch(resolved, bufnr, notify)
         end
     end
