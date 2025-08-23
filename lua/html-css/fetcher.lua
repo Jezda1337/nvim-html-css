@@ -17,7 +17,9 @@ end
 ---@param source string
 ---@param notify boolean
 function fetcher:_fetch_remote(source, notify)
-    if cache:has_source(source) then return end
+    if cache:has_source(source) then
+        return
+    end
 
     vim.system({ "curl", source }, { text = true }, function(out)
         if out.code ~= 0 then

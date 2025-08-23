@@ -3,14 +3,16 @@ local utils = require "html-css.utils"
 local cache = {
     _sources = {},
     _buffers = {},
-    _watchers = {}
+    _watchers = {},
 }
 
 ---@param bufnr integer
 ---@return Selector[]
 function cache:get_classes(bufnr)
     -- exit early if buffer doesn't exist
-    if not self._buffers[bufnr] then return {} end
+    if not self._buffers[bufnr] then
+        return {}
+    end
 
     local buffer_sources = self._buffers[bufnr]._sources or {}
     local classes = {}
@@ -50,8 +52,8 @@ function cache:update(source, data)
         meta = {
             path = resolved,
             mtime = now,
-            type = source_type
-        }
+            type = source_type,
+        },
     }
 
     local function insert_items(items, target)
@@ -104,9 +106,13 @@ end
 
 ---@param path string
 function cache:_setup_watchers(path)
-    if self._watchers[path] then return end
+    if self._watchers[path] then
+        return
+    end
     local handler = vim.uv.new_fs_event()
-    if not handler then return end --INFO attention needed
+    if not handler then
+        return
+    end --INFO attention needed
     self._watchers[path] = handler
     vim.uv.fs_event_start(handler, path, {}, function(err, fname, stats)
         vim.schedule(function()
@@ -131,9 +137,13 @@ function cache:_handle_file_change(handler, path, err, fname, stats)
 
     -- Debounce: stop and restart the watcher
     handler:stop()
-    handler:start(path, {}, vim.schedule_wrap(function()
-        self:_handle_file_change(handler, path, err, fname, stats)
-    end))
+    handler:start(
+        path,
+        {},
+        vim.schedule_wrap(function()
+            self:_handle_file_change(handler, path, err, fname, stats)
+        end)
+    )
 end
 
 ---@param source string

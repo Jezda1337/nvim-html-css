@@ -1,9 +1,10 @@
-local utils    = require "html-css.utils"
-local config   = require "html-css.config"
-local cache    = require "html-css.cache"
-local fetcher  = require "html-css.fetcher"
-local uv       = vim.uv
-local cwd      = uv.cwd()
+local utils = require "html-css.utils"
+local config = require "html-css.config"
+local cache = require "html-css.cache"
+local fetcher = require "html-css.fetcher"
+
+local uv = vim.uv
+local cwd = uv.cwd()
 
 -- TODO
 -- if the file e.g index.css while in use was being deleted error occurred
@@ -28,21 +29,27 @@ html_css.setup = function(opts)
 
     vim.api.nvim_create_autocmd({ "BufEnter", "BufWritePre" }, {
         group = vim.api.nvim_create_augroup("html-css", { clear = true }),
-        pattern = vim.tbl_map(function(ext) return "*." .. ext end, opts.enable_on),
+        pattern = vim.tbl_map(function(ext)
+            return "*." .. ext
+        end, opts.enable_on),
         callback = function(args)
-            if utils.is_special_buffer(args.buf) then return end
+            if utils.is_special_buffer(args.buf) then
+                return
+            end
 
             if opts.lsp.enable then
                 require("html-css.lsp").create_client(opts, args.buf)
             end
 
-            local html_data = require "html-css.parsers.html".setup(args.buf)
+            local html_data = require("html-css.parsers.html").setup(args.buf)
             local sources = vim.list_extend(html_data.cdn, opts.style_sheets)
 
-            if #sources <= 0 then return end
+            if #sources <= 0 then
+                return
+            end
 
             if #html_data.raw_text > 0 then
-                local css_data = require "html-css.parsers.css".setup(html_data.raw_text, true)
+                local css_data = require("html-css.parsers.css").setup(html_data.raw_text, true)
                 cache:update("buffer://" .. args.file, css_data)
                 if #css_data.imports > 0 then
                     for _, imp in pairs(css_data.imports) do
@@ -74,19 +81,21 @@ html_css.setup = function(opts)
                 end
             end
             for _, src in pairs(sources) do
-                if src:match("buffer://") then goto continue end
+                if src:match("buffer://") then
+                    goto continue
+                end
                 fetcher:fetch(src, args.buf, opts.notify)
                 ::continue::
             end
             cache:link_sources(args.buf, sources)
-        end
+        end,
     })
 
     vim.api.nvim_create_autocmd("BufDelete", {
         group = vim.api.nvim_create_augroup("html-css-cleanup", { clear = true }),
         callback = function(args)
             cache:cleanup(args.buf)
-        end
+        end,
     })
 
     -- if opts.lsp.enable then
@@ -94,13 +103,13 @@ html_css.setup = function(opts)
     -- end
 
     -- Handlers
-    require "html-css.definition".setup(opts.handlers.definition)
-    require "html-css.hover".setup(opts.handlers.hover)
+    require("html-css.definition").setup(opts.handlers.definition)
+    require("html-css.hover").setup(opts.handlers.hover)
 
     if not opts.lsp.enable then
         local ok, cmp = pcall(require, "cmp")
         if ok then
-            cmp.register_source("html-css", require "html-css.source":new(opts))
+            cmp.register_source("html-css", require("html-css.source"):new(opts))
         end
     end
 end

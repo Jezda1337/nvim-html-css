@@ -4,4 +4,8 @@ line_endings = "Unix"
 indent_type = "Spaces"
 indent_width = 4
 quote_style = "AutoPreferDouble"
-call_parentheses = "Always"
+call_parentheses = "Input"
+syntax = "Lua52"
+
+[sort_requires]
+enabled = false

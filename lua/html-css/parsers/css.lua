@@ -66,10 +66,12 @@ css.setup = function(stdout, withLocation)
                         label = ts.get_node_text(node, stdout),
                         block = ts.get_node_text(match[3][1], stdout),
                         kind = 13,
-                        range = withLocation and {
-                            start = { line = start_row, character = start_col },
-                            ["end"] = { line = end_row, character = end_col }
-                        } or nil
+                        range = withLocation
+                                and {
+                                    start = { line = start_row, character = start_col },
+                                    ["end"] = { line = end_row, character = end_col },
+                                }
+                            or nil,
                     })
                 end
                 if name == "id_name" then
@@ -78,10 +80,12 @@ css.setup = function(stdout, withLocation)
                         label = ts.get_node_text(node, stdout),
                         block = ts.get_node_text(match[6][1], stdout),
                         kind = 13,
-                        range = withLocation and {
-                            start = { line = start_row, character = start_col },
-                            ["end"] = { line = end_row, character = end_col }
-                        } or nil
+                        range = withLocation
+                                and {
+                                    start = { line = start_row, character = start_col },
+                                    ["end"] = { line = end_row, character = end_col },
+                                }
+                            or nil,
                     })
                 end
                 if name == "value" then

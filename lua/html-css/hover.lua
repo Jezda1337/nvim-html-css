@@ -1,4 +1,5 @@
 local cache = require "html-css.cache"
+local u = require "html-css.utils"
 local ts = vim.treesitter
 local hover = {}
 
@@ -11,28 +12,6 @@ local WIDE_HEIGHT = 80
 
 -- FIXME better css formatting is needed
 ---@param item Selector
-local function format_css(item)
-    local formatted_css = item.block
-        -- Add newline after opening brace with proper indentation
-        :gsub("{%s*", " {\n  ")
-        -- Add newline and indent after semicolons
-        :gsub(";%s*", ";\n  ")
-        -- Add space after colon if missing
-        :gsub(":%s*", ": ")
-        -- Handle properties without semicolons at the end (like your example)
-        :gsub("([^;{}])%s*}", "\\1;\n}")
-        -- Clean up any potential double spaces in indentation
-        :gsub("\n%s+", "\n  ")
-        -- Ensure proper spacing around important declarations
-        :gsub("!important", " !important")
-
-    return string.format(
-        "```css\n/* Source: %s */\n.%s%s\n```",
-        item.source_name,
-        item.label,
-        formatted_css
-    )
-end
 
 ---@param word string
 ---@param opts Hover
@@ -62,10 +41,9 @@ local function get_block(word, opts)
         local content = {}
         for _, item in pairs(selectors) do
             if item.label == word then
-                table.insert(content, format_css(item))
+                table.insert(content, u.format_css(item))
             end
         end
-
 
         if #content > 0 then
             local win_opts = {
@@ -73,7 +51,7 @@ local function get_block(word, opts)
                 max_width = math.floor((WIDE_HEIGHT * 2) * (vim.o.columns / (WIDE_HEIGHT * 2 * 16 / 9))),
                 wrap = opts.wrap,
                 relative = opts.position,
-                border = opts.border
+                border = opts.border,
             }
             vim.lsp.util.open_floating_preview(content, "markdown", win_opts)
             return true

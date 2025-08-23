@@ -9,6 +9,7 @@
 ---@field kind integer
 ---@field range Range
 ---@field source_name string
+---@field source_type string
 
 ---@class HTML_Data
 ---@field cdn table<string>

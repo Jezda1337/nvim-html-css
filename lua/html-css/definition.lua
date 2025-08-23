@@ -12,7 +12,6 @@ local function get_selector(word)
     local selectors = nil
     local context = nil
 
-
     while node do
         if node:type() == "attribute" or node:type() == "jsx_attribute" then
             local attr_name = ts.get_node_text(node:child(0), 0)
@@ -41,7 +40,7 @@ local function get_selector(word)
                 vim.lsp.util.show_document({
                     uri = vim.uri_from_fname(item.source_name),
                     range = item.range,
-                    focus = true
+                    focus = true,
                 }, "utf-32")
                 return true
             end

@@ -16,19 +16,19 @@ local function create_server(dispatchers)
                         openClose = true,
                         change = 1,
                         willSave = false,
-                        willSaveWaitUntil = false
+                        willSaveWaitUntil = false,
                     },
                     completionProvider = {
                         triggerCharacters = { '"', "'", " " },
-                        resolveProvider = true
+                        resolveProvider = true,
                     },
                     hoverProvider = true,
-                    definitionProvider = true
+                    definitionProvider = true,
                 },
                 serverInfo = {
                     name = "html-css-lsp",
-                    version = "0.1.0"
-                }
+                    version = "0.1.0",
+                },
             })
         elseif method == "textDocument/completion" then
             local uri = params.textDocument.uri
@@ -80,20 +80,15 @@ local function create_server(dispatchers)
 
             local completion_items = {}
             for _, item in ipairs(items) do
-                local formatted_css = item.block
-                    :gsub("{%s*", " {\n  ")
-                    :gsub(";%s*", ";\n  ")
-                    :gsub(":%s*", ": ")
-                    :gsub("([^;{}])%s*}", "%1;\n}")
-                    :gsub("\n%s+", "\n  ")
-                    :gsub("!important", " !important")
+                -- local formatted_css = item.block
+                --     :gsub("{%s*", " {\n  ")
+                --     :gsub(";%s*", ";\n  ")
+                --     :gsub(":%s*", ": ")
+                --     :gsub("([^;{}])%s*}", "%1;\n}")
+                --     :gsub("\n%s+", "\n  ")
+                --     :gsub("!important", " !important")
 
-                local documentation = string.format(
-                    "css\n/* Source: %s */\n.%s%s\n",
-                    item.source_name,
-                    item.label,
-                    formatted_css
-                )
+                local documentation = utils.format_css(item)
 
                 table.insert(completion_items, {
                     label = item.label,
@@ -101,15 +96,15 @@ local function create_server(dispatchers)
                     detail = item.source_name and ("🠖 " .. item.source_name) or "[Unknown]",
                     documentation = {
                         kind = "markdown",
-                        value = documentation
+                        value = documentation,
                     },
                     insertText = item.label,
                     filterText = item.label,
                     sortText = item.label,
                     data = {
                         source_name = item.source_name,
-                        source_type = item.source_type or "unknown"
-                    }
+                        source_type = item.source_type or "unknown",
+                    },
                 })
             end
 
@@ -172,8 +167,8 @@ LSP.create_client = function(opts, bufnr)
             srv.set_opts(opts)
             return srv
         end,
-        root_dir = vim.fs.dirname(vim.fs.find({ ".git", "package.json", ".nvim.lua" }, { upward = true })[1]) or
-            vim.fn.getcwd()
+        root_dir = vim.fs.dirname(vim.fs.find({ ".git", "package.json", ".nvim.lua" }, { upward = true })[1])
+            or vim.fn.getcwd(),
     })
     if client_id then
         vim.lsp.buf_attach_client(bufnr, client_id)

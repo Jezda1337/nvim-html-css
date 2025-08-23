@@ -1,24 +1,37 @@
 {
   "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
   "runtime": {
-    "version": "LuaJIT"
+    "version": "LuaJIT",
+    "path": [
+      "?.lua",
+      "?/init.lua"
+    ]
   },
   "diagnostics": {
     "globals": ["vim"]
   },
-  "workspace.library": [
-    "${3rd}/luv/library",
-    "~/.local/share/nvim/lazy/luvit-meta/library",
-    "${3rd}/busted/library",
-    "${3rd}/luv/library",
-    "/usr/local/share/nvim/runtime/lua",
-    "/usr/local/share/nvim/runtime"
-  ],
+  "workspace": {
+    "library": [
+      "${3rd}/luv/library",
+      "~/.local/share/nvim/lazy/luvit-meta/library",
+      "${3rd}/busted/library",
+      "/usr/local/share/nvim/runtime",
+      "/usr/local/share/nvim/runtime/lua",
+
+      -- ✅ ADD YOUR PLUGIN'S ROOT HERE
+      "${workspaceFolder}",
+      "${workspaceFolder}/lua"
+    ],
+    "maxPreload": 5000,
+    "preloadFileSize": 100000
+  },
   "hint": {
     "enable": true
   },
   "codeLens": {
     "enable": true
   },
-  "completion.enable": true
+  "completion": {
+    "enable": true
+  }
 }

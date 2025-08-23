@@ -8,7 +8,6 @@ string.start_with = function(self, str)
     return self:sub(1, #str) == str
 end
 
-
 ---@param path string
 ---@return boolean
 utils.file_exists = function(path)
@@ -22,7 +21,9 @@ end
 ---@param cb function
 utils.read_file = function(path, cb)
     uv.fs_open(path, "r", 438, function(err, fd)
-        if err ~= nil then return end
+        if err ~= nil then
+            return
+        end
         assert(not err, err)
         uv.fs_fstat(fd, function(err, stat)
             assert(not err, err)
@@ -69,7 +70,9 @@ utils.is_local = function(path)
 end
 
 local function normalize_path(p)
-    if not p or p == "" then return p end
+    if not p or p == "" then
+        return p
+    end
     local np = vim.fs.normalize(p) -- cleans ./ and ../
     return np
 end
@@ -79,8 +82,12 @@ end
 utils.resolve_path = function(path, base_dir)
     local cwd = uv.cwd()
 
-    if utils.is_remote(path) then return path end
-    if not path or path == "" then return "" end
+    if utils.is_remote(path) then
+        return path
+    end
+    if not path or path == "" then
+        return ""
+    end
 
     -- normalize ./ and ../ relative to base_dir
     if path:match("^%.") and base_dir then
@@ -132,6 +139,65 @@ utils.is_special_buffer = function(bufnr)
         return true
     end
     return false
+end
+
+utils.format_css = function(item)
+    local css = item.block
+    local lines = {}
+
+    -- Extract selector and body
+    local selector = item.label
+    local body = css:match("{(.*)}") or ""
+
+    -- Split body into lines, trim whitespace
+    local rules = {}
+    for rule in body:gsub(";%s*$", ""):gmatch("[^;]+") do
+        local trimmed = vim.trim(rule)
+        if trimmed ~= "" then
+            table.insert(rules, trimmed)
+        end
+    end
+
+    -- Format each rule
+    local formatted_rules = {}
+    for _, rule in ipairs(rules) do
+        local property, value = rule:match("^([%w%-]+)%s*:%s*(.*)$")
+
+        if property and value then
+            -- Trim and normalize value
+            value = vim.trim(value)
+
+            -- Ensure !important has space
+            if value:find("!important") then
+                value = value:gsub("%s*!important%s*", " !important")
+            end
+
+            table.insert(formatted_rules, string.format("  %s: %s;", property, value))
+        else
+            -- Fallback for malformed rules (e.g. comments or nested)
+            local trimmed = vim.trim(rule)
+            if trimmed:sub(1, 1) == "/" then -- Comment
+                table.insert(formatted_rules, string.format("  %s", trimmed))
+            else
+                table.insert(formatted_rules, string.format("  %s;", trimmed))
+            end
+        end
+    end
+
+    -- If no rules, still include closing brace
+    if #formatted_rules == 0 then
+        table.insert(formatted_rules, "  /* No styles */")
+    end
+
+    -- Build final output
+    table.insert(lines, "```css")
+    -- table.insert(lines, "/* Source: " .. item.source_name .. " */")
+    table.insert(lines, "." .. selector .. " {")
+    vim.list_extend(lines, formatted_rules)
+    table.insert(lines, "}")
+    table.insert(lines, "```")
+
+    return table.concat(lines, "\n")
 end
 
 return utils
