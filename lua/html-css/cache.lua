@@ -73,28 +73,33 @@ end
 
 ---@param bufnr integer
 ---@param sources table<string>
-function cache:link_sources(bufnr, sources)
+---@param base_dir string|nil
+function cache:link_sources(bufnr, sources, base_dir)
     local resolved_sources = {}
+
     for _, src in pairs(sources) do
-        local resolved = utils.resolve_path(src)
-        resolved_sources[resolved] = true
+        local resolved = utils.resolve_path(src, base_dir)
+        if resolved then
+            resolved_sources[resolved] = true
 
-        if self._sources[resolved] and self._sources[resolved].imports then
-            for _, imp in pairs(self._sources[resolved].imports or {}) do
-                resolved_sources[imp] = true
+            if self._sources[resolved] and self._sources[resolved].imports then
+                for _, imp in pairs(self._sources[resolved].imports or {}) do
+                    local imp_resolved = utils.resolve_path(imp, vim.fn.fnamemodify(resolved, ":h"))
+                    if imp_resolved then
+                        resolved_sources[vim.fs.normalize(imp_resolved)] = true
+                    end
+                end
             end
-        end
 
-        if utils.is_local(resolved) and not self._watchers[resolved] and not resolved:match("buffer://") then
-            vim.schedule(function()
-                self:_setup_watchers(resolved)
-            end)
+            if utils.is_local(resolved) and not self._watchers[resolved] and not resolved:match("buffer://") then
+                vim.schedule(function()
+                    self:_setup_watchers(resolved)
+                end)
+            end
         end
     end
 
-    self._buffers[bufnr] = {
-        _sources = resolved_sources
-    }
+    self._buffers[bufnr] = { _sources = resolved_sources }
 end
 
 ---@param path string

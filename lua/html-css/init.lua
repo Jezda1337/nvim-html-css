@@ -52,30 +52,24 @@ html_css.setup = function(opts)
                 table.insert(sources, "buffer://" .. args.file)
             end
 
-            -- normalize and proper formatting the paths of the local linked files
+            -- normalize and properly format the paths of local linked files
             for i, src in ipairs(sources) do
                 if utils.is_local(src) then
-                    if src:match("^/") then
-                        sources[i] = vim.fs.normalize(cwd .. "/" .. src)
-                    elseif src:match("^buffer://") then
-                        sources[i] = src
-                    else
-                        -- Check if this source comes from user configuration (opts.style_sheets)
-                        local is_from_config = false
-                        for _, config_src in ipairs(opts.style_sheets) do
-                            if config_src == src then
-                                is_from_config = true
-                                break
-                            end
+                    -- Check if this source comes from user configuration (opts.style_sheets)
+                    local is_from_config = false
+                    for _, config_src in ipairs(opts.style_sheets) do
+                        if config_src == src then
+                            is_from_config = true
+                            break
                         end
+                    end
 
-                        if is_from_config then
-                            -- Resolve relative to project root (cwd)
-                            sources[i] = vim.fs.normalize(cwd .. "/" .. src)
-                        else
-                            -- Resolve relative to current file (for HTML imports)
-                            sources[i] = vim.fs.normalize(vim.fn.expand("%:p:h") .. "/" .. src)
-                        end
+                    -- base_dir is cwd for config, otherwise current file’s folder
+                    local base_dir = is_from_config and cwd or vim.fn.expand("%:p:h")
+
+                    local resolved = utils.resolve_path(src, base_dir)
+                    if resolved then
+                        sources[i] = resolved
                     end
                 end
             end
