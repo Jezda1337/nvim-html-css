@@ -23,7 +23,7 @@ local function create_server(dispatchers)
                         resolveProvider = true
                     },
                     hoverProvider = true,
-                    definitionProvder = true
+                    definitionProvider = true
                 },
                 serverInfo = {
                     name = "html-css-lsp",
