@@ -80,7 +80,7 @@ function cache:link_sources(bufnr, sources, base_dir)
     for _, src in pairs(sources) do
         local resolved = utils.resolve_path(src, base_dir)
         if resolved then
-            resolved_sources[resolved] = true
+            resolved_sources[resolved] = utils.file_exists(src)
 
             if self._sources[resolved] and self._sources[resolved].imports then
                 for _, imp in pairs(self._sources[resolved].imports or {}) do
