@@ -20,7 +20,7 @@ html_css.setup = function(opts)
 
     vim.opt.ex = true
     local project_config_path = cwd .. "/" .. ".nvim.lua"
-    if uv.fs_stat(project_config_path) then
+    if utils.file_exists(project_config_path) then
         dofile(project_config_path)
         local project_config = vim.g.html_css or {}
         opts = vim.tbl_deep_extend("force", opts, project_config)
@@ -65,7 +65,7 @@ html_css.setup = function(opts)
                     local base_dir = is_from_config and cwd or vim.fn.expand("%:p:h")
                     local resolved = utils.resolve_path(src, base_dir)
 
-                    if resolved and vim.loop.fs_stat(resolved) then
+                    if resolved and utils.file_exists(resolved) then
                         sources[i] = resolved
                     else
                         if is_from_config then
