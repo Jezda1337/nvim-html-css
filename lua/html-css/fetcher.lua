@@ -33,8 +33,10 @@ function fetcher:_fetch_remote(source, notify)
             end)
         end
 
-        local css_data = require "html-css.parsers.css".setup(out.stdout, false)
-        cache:update(source, css_data)
+        vim.schedule(function()
+            local css_data = require "html-css.parsers.css".setup(out.stdout, false)
+            cache:update(source, css_data)
+        end)
     end)
 end
 
@@ -49,13 +51,15 @@ function fetcher:_fetch_local(source, bufnr, notify)
     end
 
     utils.read_file(source, function(out)
-        local css_data = require "html-css.parsers.css".setup(out, true)
-        cache:update(source, css_data)
+        vim.schedule(function()
+            local css_data = require "html-css.parsers.css".setup(out, true)
+            cache:update(source, css_data)
 
-        if #css_data.imports > 0 then
-            local base_dir = vim.fn.fnamemodify(source, ":h")
-            self:_process_imports(css_data.imports, bufnr, notify, base_dir)
-        end
+            if #css_data.imports > 0 then
+                local base_dir = vim.fn.fnamemodify(source, ":h")
+                self:_process_imports(css_data.imports, bufnr, notify, base_dir)
+            end
+        end)
     end)
 end
 

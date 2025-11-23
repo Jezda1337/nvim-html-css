@@ -16,7 +16,9 @@ function cache:get_classes(bufnr)
     local classes = {}
 
     for src in pairs(buffer_sources) do
-        vim.list_extend(classes, self._sources[src].classes)
+        if self._sources[src] then
+            vim.list_extend(classes, self._sources[src].classes)
+        end
     end
 
     return classes
