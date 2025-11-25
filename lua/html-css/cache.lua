@@ -124,11 +124,13 @@ end
 ---@param stats table<string, boolean|nil>
 function cache:_handle_file_change(handler, path, err, fname, stats)
     utils.read_file(path, function(out)
-        local css_data = require "html-css.parsers.css".setup(out)
-        self:update(path, css_data)
-        for _, src in pairs(css_data.imports) do
-            require "html-css.fetcher":fetch(src, 0, false)
-        end
+        vim.schedule(function()
+            local css_data = require "html-css.parsers.css".setup(out)
+            self:update(path, css_data)
+            for _, src in pairs(css_data.imports) do
+                require "html-css.fetcher":fetch(src, 0, false)
+            end
+        end)
     end)
 
     -- Debounce: stop and restart the watcher
