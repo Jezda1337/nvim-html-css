@@ -80,17 +80,18 @@ local function create_server(dispatchers)
 
             local seen = {}
             local completion_items = {}
-            
+
             for _, item in ipairs(items) do
                 local documentation = utils.format_css(item)
-                
+
                 local key = item.label .. "::" .. (item.source_name or "unknown")
 
                 if not seen[key] then
                     local ci = {
                         label = item.label,
                         kind = 21, -- CompletionItemKind.Constant
-                        detail = item.source_name and ("🠖 " .. utils.get_source_name(item.source_name)) or "[Unknown]",
+                        detail = item.source_name and ("🠖 " .. utils.get_source_name(item.source_name))
+                            or "[Unknown]",
                         docs = { documentation },
                         insertText = item.label,
                         filterText = item.label,
@@ -112,7 +113,7 @@ local function create_server(dispatchers)
             for _, ci in ipairs(completion_items) do
                 ci.documentation = {
                     kind = "markdown",
-                    value = table.concat(ci.docs, "\n\n")
+                    value = table.concat(ci.docs, "\n\n"),
                 }
                 ci.docs = nil
             end
@@ -130,7 +131,6 @@ local function create_server(dispatchers)
                 return true, 1
             end
 
-            -- Identify word at cursor and context
             local context = nil
             local word = nil
             local node = vim.treesitter.get_node({ lang = "html", pos = { position.line, position.character } })
@@ -179,7 +179,7 @@ local function create_server(dispatchers)
                 if item.label == word and item.range then
                     table.insert(locations, {
                         uri = vim.uri_from_fname(item.source_name),
-                        range = item.range
+                        range = item.range,
                     })
                 end
             end
@@ -254,8 +254,8 @@ local function create_server(dispatchers)
                 callback(nil, {
                     contents = {
                         kind = "markdown",
-                        value = table.concat(docs, "\n\n---\n\n") -- Separate multiple definitions with a horizontal rule
-                    }
+                        value = table.concat(docs, "\n\n---\n\n"), -- Separate multiple definitions with a horizontal rule
+                    },
                 })
             end)
         elseif method == "shutdown" then

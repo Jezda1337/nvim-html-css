@@ -21,7 +21,7 @@ html_css.setup = function(opts)
 
     vim.opt.ex = true
     local project_config_path = cwd .. "/" .. ".nvim.lua"
-    if uv.fs_stat(project_config_path) then
+    if utils.file_exists(project_config_path) then
         dofile(project_config_path)
         local project_config = vim.g.html_css or {}
         opts = vim.tbl_deep_extend("force", opts, project_config)
@@ -60,7 +60,8 @@ html_css.setup = function(opts)
             end
 
             -- normalize and properly format the paths of local linked files
-            for i, src in ipairs(sources) do
+            for i = #sources, 1, -1 do
+                local src = sources[i]
                 if utils.is_local(src) then
                     -- Check if this source comes from user configuration (opts.style_sheets)
                     local is_from_config = false
@@ -73,10 +74,18 @@ html_css.setup = function(opts)
 
                     -- base_dir is cwd for config, otherwise current file’s folder
                     local base_dir = is_from_config and cwd or vim.fn.expand("%:p:h")
-
                     local resolved = utils.resolve_path(src, base_dir)
-                    if resolved then
+
+                    if resolved and utils.file_exists(resolved) then
                         sources[i] = resolved
+                    else
+                        if is_from_config then
+                            vim.notify(
+                                string.format("[html-css] Configured stylesheet not found: %s", src),
+                                vim.log.levels.WARN
+                            )
+                        end
+                        table.remove(sources, i)
                     end
                 end
             end

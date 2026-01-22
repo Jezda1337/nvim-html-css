@@ -75,29 +75,8 @@ css.query = [[
          )
       )
   ) @media_statement)
-
-((stylesheet
-   (import_statement
-     (string_value
-        (_) @value)
-        (#not-lua-match? @value "^tailwind")
-        (#not-lua-match? @value "^tw%-")
-)))
-((stylesheet
-   (import_statement
-     (call_expression
-       (function_name)
-       (arguments
-         (string_value
-            (_)@value)
-        (#not-lua-match? @value "^tailwind")
-        (#not-lua-match? @value "^tw%-")
-)))))
 ]]
 
----@param stdout string
----@param withLocation boolean Flag for ignoring remote styles
----@return CSS_Data
 css.setup = function(stdout, withLocation)
     local root, query = utils.string_parse(css.lang, css.query, stdout)
     ---@type CSS_Data
@@ -108,42 +87,39 @@ css.setup = function(stdout, withLocation)
     }
 
     for _, match, _ in query:iter_matches(root, stdout, 0, -1, { all = true }) do
-        -- 1. Scan for media context in this match
         local media = nil
         for id, nodes in pairs(match) do
             if query.captures[id] == "media_statement" then
-                 local media_node = nodes[1]
-                 local parts = {}
-                 for child in media_node:iter_children() do
-                     local ctype = child:type()
-                     if ctype ~= "block" then
-                         local text = ts.get_node_text(child, stdout)
-                         if text ~= "@media" then
-                             table.insert(parts, text)
-                         end
-                     end
-                 end
-                 media = table.concat(parts, " ")
-                 -- Clean up extra spaces if any
-                 media = media:gsub("^%s+", ""):gsub("%s+$", "")
-                 break
+                local media_node = nodes[1]
+                local parts = {}
+                for child in media_node:iter_children() do
+                    local ctype = child:type()
+                    if ctype ~= "block" then
+                        local text = ts.get_node_text(child, stdout)
+                        if text ~= "@media" then
+                            table.insert(parts, text)
+                        end
+                    end
+                end
+                media = table.concat(parts, " ")
+                media = media:gsub("^%s+", ""):gsub("%s+$", "")
+                break
             end
         end
 
-        -- 2. Process captures
         for id, nodes in pairs(match) do
             local name = query.captures[id]
             for _, node in ipairs(nodes) do
                 local start_row, start_col, end_row, end_col = node:range()
-                
+
                 if name == "class_name" then
                     table.insert(css_data.class, {
                         type = "class",
                         label = ts.get_node_text(node, stdout),
                         -- The block capture is separate. We need to find which node corresponds to class_block in this match.
-                        -- In the query, @class_block is used. 
+                        -- In the query, @class_block is used.
                         -- We can iterate match to find it.
-                        block = (function() 
+                        block = (function()
                             for cid, cnodes in pairs(match) do
                                 if query.captures[cid] == "class_block" then
                                     return ts.get_node_text(cnodes[1], stdout)
@@ -165,7 +141,7 @@ css.setup = function(stdout, withLocation)
                     table.insert(css_data.id, {
                         type = "id",
                         label = ts.get_node_text(node, stdout),
-                        block = (function() 
+                        block = (function()
                             for cid, cnodes in pairs(match) do
                                 if query.captures[cid] == "id_block" then
                                     return ts.get_node_text(cnodes[1], stdout)

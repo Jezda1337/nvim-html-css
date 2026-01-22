@@ -18,7 +18,9 @@ function cache:get_classes(bufnr)
     local classes = {}
 
     for src in pairs(buffer_sources) do
-        vim.list_extend(classes, self._sources[src].classes)
+        if self._sources[src] then
+            vim.list_extend(classes, self._sources[src].classes)
+        end
     end
 
     return classes
@@ -82,7 +84,7 @@ function cache:link_sources(bufnr, sources, base_dir)
     for _, src in pairs(sources) do
         local resolved = utils.resolve_path(src, base_dir)
         if resolved then
-            resolved_sources[resolved] = true
+            resolved_sources[resolved] = utils.file_exists(src)
 
             if self._sources[resolved] and self._sources[resolved].imports then
                 for _, imp in pairs(self._sources[resolved].imports or {}) do
@@ -128,11 +130,13 @@ end
 ---@param stats table<string, boolean|nil>
 function cache:_handle_file_change(handler, path, err, fname, stats)
     utils.read_file(path, function(out)
-        local css_data = require "html-css.parsers.css".setup(out)
-        self:update(path, css_data)
-        for _, src in pairs(css_data.imports) do
-            require "html-css.fetcher":fetch(src, 0, false)
-        end
+        vim.schedule(function()
+            local css_data = require "html-css.parsers.css".setup(out)
+            self:update(path, css_data)
+            for _, src in pairs(css_data.imports) do
+                require "html-css.fetcher":fetch(src, 0, false)
+            end
+        end)
     end)
 
     -- Debounce: stop and restart the watcher
