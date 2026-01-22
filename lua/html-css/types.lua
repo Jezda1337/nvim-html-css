@@ -6,6 +6,7 @@
 ---@class Selector
 ---@field label string
 ---@field block string
+---@field media? string
 ---@field kind integer
 ---@field range Range
 ---@field source_name string

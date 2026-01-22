@@ -143,8 +143,7 @@ end
 
 utils.format_css = function(item)
     local css = item.block
-    local lines = {}
-
+    
     -- Extract selector and body
     local selector = item.label
     local body = css:match("{(.*)}") or ""
@@ -189,15 +188,25 @@ utils.format_css = function(item)
         table.insert(formatted_rules, "  /* No styles */")
     end
 
-    -- Build final output
-    table.insert(lines, "```css")
-    -- table.insert(lines, "/* Source: " .. item.source_name .. " */")
-    table.insert(lines, "." .. selector .. " {")
-    vim.list_extend(lines, formatted_rules)
-    table.insert(lines, "}")
-    table.insert(lines, "```")
+    local prefix = (item.type == "id") and "#" or "."
+    local selector_line = prefix .. selector .. " {"
+    
+    local css_code = table.concat({
+        selector_line,
+        table.concat(formatted_rules, "\n"),
+        "}",
+    }, "\n")
 
-    return table.concat(lines, "\n")
+    -- Wrap in media query if present
+    if item.media then
+        css_code = "@media " .. item.media .. " {\n" .. css_code:gsub("\n", "\n  ") .. "\n}"
+    end
+
+    return table.concat({
+        "```css",
+        css_code,
+        "```",
+    }, "\n")
 end
 
 return utils

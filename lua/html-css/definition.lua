@@ -35,15 +35,39 @@ local function get_selector(word)
     end
 
     if selectors ~= nil then
+        local matches = {}
         for _, item in pairs(selectors) do
             if item.label == word and item.range then
-                vim.lsp.util.show_document({
-                    uri = vim.uri_from_fname(item.source_name),
-                    range = item.range,
-                    focus = true,
-                }, "utf-32")
-                return true
+                table.insert(matches, item)
             end
+        end
+
+        if #matches == 1 then
+            local item = matches[1]
+            vim.lsp.util.show_document({
+                uri = vim.uri_from_fname(item.source_name),
+                range = item.range,
+                focus = true,
+            }, "utf-32")
+            return true
+        elseif #matches > 1 then
+            vim.ui.select(matches, {
+                prompt = "Select Definition for " .. word .. ":",
+                format_item = function(item)
+                    local src = vim.fn.fnamemodify(item.source_name, ":t")
+                    local extra = item.media and (" [" .. item.media .. "]") or ""
+                    return string.format("%s:%d%s", src, item.range.start.line + 1, extra)
+                end,
+            }, function(choice)
+                if choice then
+                    vim.lsp.util.show_document({
+                        uri = vim.uri_from_fname(choice.source_name),
+                        range = choice.range,
+                        focus = true,
+                    }, "utf-32")
+                end
+            end)
+            return true
         end
     end
 

@@ -65,22 +65,43 @@ function source:complete(params, callback)
 end
 
 function source:_format_items(items)
-    return vim.tbl_map(function(item)
-        return {
-            label = item.label,
-            kind = cmp.lsp.CompletionItemKind.Constant,
-            menu = item.source_name and ("🠖 " .. item.source_name) or "[Unknown]",
-            documentation = {
-                kind = cmp.lsp.MarkupKind.Markdown,
-                value = self:_create_docs(item),
-            },
-            dup = 1,
-            data = {
-                source_name = item.source_name,
-                source_type = item.source_type,
-            },
+    local seen = {}
+    local result = {}
+
+    for _, item in ipairs(items) do
+        local doc = self:_create_docs(item)
+        
+        local key = item.label .. "::" .. (item.source_name or "unknown")
+
+        if not seen[key] then
+            local ci = {
+                label = item.label,
+                kind = cmp.lsp.CompletionItemKind.Constant,
+                menu = item.source_name and ("🠖 " .. utils.get_source_name(item.source_name)) or "[Unknown]",
+                docs = { doc }, -- temporary storage
+                dup = 1,
+                data = {
+                    source_name = item.source_name,
+                    source_type = item.source_type,
+                },
+            }
+            seen[key] = ci
+            table.insert(result, ci)
+        else
+            table.insert(seen[key].docs, doc)
+        end
+    end
+
+    -- Finalize documentation
+    for _, ci in ipairs(result) do
+        ci.documentation = {
+            kind = cmp.lsp.MarkupKind.Markdown,
+            value = table.concat(ci.docs, "\n\n"),
         }
-    end, items)
+        ci.docs = nil
+    end
+
+    return result
 end
 
 -- TODO css block need refactoring with better css formatting

@@ -62,7 +62,21 @@ function fetcher:_fetch_local(source, bufnr, notify)
 end
 
 ---@param imports table<string>
----@param bufnr integer
+---@param parent_path string
+function fetcher:fetch_imports(imports, parent_path)
+    local base_dir = vim.fn.fnamemodify(parent_path, ":h")
+    for _, imp in pairs(imports) do
+        local resolved = utils.resolve_path(imp, base_dir)
+        if resolved then
+            -- We pass nil as bufnr because this is a background update,
+            -- not tied to a specific buffer opening event.
+            self:fetch(resolved, nil, false)
+        end
+    end
+end
+
+---@param imports table<string>
+---@param bufnr integer|nil
 ---@param notify boolean
 function fetcher:_process_imports(imports, bufnr, notify, base_dir)
     local sources = {}
@@ -75,11 +89,13 @@ function fetcher:_process_imports(imports, bufnr, notify, base_dir)
         end
     end
 
-    for src, _ in pairs(cache._buffers[bufnr]._sources or {}) do
-        table.insert(sources, src)
-    end
+    if bufnr then
+        for src, _ in pairs(cache._buffers[bufnr]._sources or {}) do
+            table.insert(sources, src)
+        end
 
-    cache:link_sources(bufnr, sources)
+        cache:link_sources(bufnr, sources)
+    end
 end
 
 return fetcher
