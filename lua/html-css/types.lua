@@ -19,7 +19,7 @@
 ---@class Config
 ---@field enable_on table<string>
 ---@field handlers Handlers
----@field notify boolean
+---@field notify? boolean
 ---@field style_sheets table<string>
 ---@field documentation _config_documentation
 
@@ -27,8 +27,8 @@
 ---@field auto_show boolean
 
 ---@class Handlers
----@field definition Definition
----@field hover Hover
+---@field definition? Definition
+---@field hover? Hover
 
 ---@class Definition
 ---@field bind string
