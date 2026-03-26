@@ -2,13 +2,11 @@
   "$schema": "https://raw.githubusercontent.com/sumneko/vscode-lua/master/setting/schema.json",
   "runtime": {
     "version": "LuaJIT",
-    "path": [
-      "?.lua",
-      "?/init.lua"
-    ]
+    "path": ["?.lua", "?/init.lua"]
   },
   "diagnostics": {
-    "globals": ["vim"]
+    "globals": ["vim",
+            "try_close"]
   },
   "workspace": {
     "library": [
@@ -18,7 +16,6 @@
       "/usr/local/share/nvim/runtime",
       "/usr/local/share/nvim/runtime/lua",
 
-      -- ✅ ADD YOUR PLUGIN'S ROOT HERE
       "${workspaceFolder}",
       "${workspaceFolder}/lua"
     ],

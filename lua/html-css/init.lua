@@ -13,7 +13,7 @@ local html_css = {}
 
 ---@param opts Config
 html_css.setup = function(opts)
-    opts = vim.tbl_extend("force", config, opts)
+    opts = vim.tbl_deep_extend("force", config, opts)
 
     -- manually load everything from plugin runtime
     -- this was the solution for the #44
@@ -111,6 +111,28 @@ html_css.setup = function(opts)
     end
     if opts.handlers.hover then
         require("html-css.hover").setup(opts.handlers.hover)
+    end
+
+    -- Peek
+    if opts.peek.enabled then
+        local peek = require("html-css.peek")
+
+        vim.api.nvim_create_user_command("HtmlCssPeek", function()
+            local params = vim.lsp.util.make_position_params(0, "utf-8")
+
+            vim.lsp.buf_request(0, "textDocument/definition", params, function(err, result)
+                if err or not result or vim.tbl_isempty(result) then
+                    return
+                end
+
+                local def = result[1]
+                local uri = def.uri or def.targetUri
+                local range = def.range or def.targetSelectionRange
+                local filepath = vim.uri_to_fname(uri)
+
+                peek.open(opts.peek, filepath, range)
+            end)
+        end, { desc = "html-css: peek CSS source" })
     end
 end
 

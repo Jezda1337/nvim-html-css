@@ -18,17 +18,27 @@
 
 ---@class Config
 ---@field enable_on table<string>
----@field handlers Handlers
+---@field handlers? Handlers
+---@field peek? Peek
 ---@field notify? boolean
----@field style_sheets table<string>
----@field documentation _config_documentation
+---@field style_sheets? table<string>
+---@field documentation? Documentation
 
----@class _config_documentation
+---@class Documentation
 ---@field auto_show boolean
 
 ---@class Handlers
 ---@field definition? Definition
 ---@field hover? Hover
+
+---@class Peek
+---@field enabled boolean
+---@field border "rounded"|"single"|"double"|"shadow"|"none"
+---@field width number
+---@field height number
+---@field style string
+---@field position "cursor"|"center"
+---@field focus boolean
 
 ---@class Definition
 ---@field bind string
