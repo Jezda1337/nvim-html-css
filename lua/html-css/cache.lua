@@ -29,6 +29,10 @@ end
 ---@param bufnr integer
 ---@return Selector[]
 function cache:get_ids(bufnr)
+    if not self._buffers[bufnr] then
+        return {}
+    end
+    
     local buffer_sources = self._buffers[bufnr]._sources or {}
     local ids = {}
 
