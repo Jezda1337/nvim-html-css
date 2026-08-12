@@ -3,6 +3,39 @@ local utils = require "html-css.utils"
 
 local LSP = {}
 
+--- Finds the smallest node at `position`, resolving through injected language
+--- trees (e.g. the HTML region injected into a Twig/Blade/Vue buffer) instead
+--- of forcing a fresh, unscoped parse of the whole buffer as `lang = "html"`.
+--- The latter breaks on any non-HTML template syntax elsewhere in the file
+--- (has_error == true) and can fail to resolve a node at all, even at
+--- positions the injected tree parses perfectly fine.
+---@param bufnr integer
+---@param position { line: integer, character: integer }
+---@return TSNode|nil
+local function get_context_node(bufnr, position)
+    local ok, parser = pcall(vim.treesitter.get_parser, bufnr)
+    if not ok or not parser then
+        return nil
+    end
+
+    parser:parse(true)
+
+    local range = { position.line, position.character, position.line, position.character }
+    local lang_tree = parser:language_for_range(range)
+
+    for _, tree in ipairs(lang_tree:trees()) do
+        local sr, sc, er, ec = tree:root():range()
+        local after_start = position.line > sr or (position.line == sr and position.character >= sc)
+        local before_end = position.line < er or (position.line == er and position.character <= ec)
+        if after_start and before_end then
+            return tree:root()
+                :named_descendant_for_range(position.line, position.character, position.line, position.character)
+        end
+    end
+
+    return nil
+end
+
 local function create_server(dispatchers)
     local closing = false
     local srv = {}
@@ -47,7 +80,7 @@ local function create_server(dispatchers)
             end
 
             local context = nil
-            local node = vim.treesitter.get_node({ lang = "html", pos = { position.line, position.character } })
+            local node = get_context_node(bufnr, position)
 
             while node do
                 if node:type() == "attribute" or node:type() == "jsx_attribute" then
@@ -133,7 +166,7 @@ local function create_server(dispatchers)
 
             local context = nil
             local word = nil
-            local node = vim.treesitter.get_node({ lang = "html", pos = { position.line, position.character } })
+            local node = get_context_node(bufnr, position)
 
             -- Small helper to traverse up and check attributes
             local curr = node
@@ -200,7 +233,7 @@ local function create_server(dispatchers)
             -- Identify word at cursor and context
             local context = nil
             local word = nil
-            local node = vim.treesitter.get_node({ lang = "html", pos = { position.line, position.character } })
+            local node = get_context_node(bufnr, position)
 
             -- Helper to traverse up and check attributes (reused from definition)
             local curr = node
